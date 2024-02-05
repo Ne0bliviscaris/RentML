@@ -1,4 +1,4 @@
-# import torch
+# v1.0
 import re
 
 import easyocr
