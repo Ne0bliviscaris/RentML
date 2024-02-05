@@ -207,3 +207,4 @@ dataset/training/Osobowy/20230828_160110.jpg
 dataset/training/Osobowy/20230914_224922.jpg
 dataset/training/Osobowy/20230930_123824.jpg
 __pycache__
+bkp detect_car.pth
