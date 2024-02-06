@@ -1,4 +1,4 @@
-# v1.0
+# v1.01
 import re
 from datetime import datetime
 
@@ -17,19 +17,6 @@ def extract_time_from_filename(filename: str):
     Returns:
         datetime.datetime or str: A datetime object representing the date and time from the filename, or "Unreadable date" if the date and time cannot be extracted.
     """
-    # date_time_match = re.search(r"(\d{8})_(\d{6})", filename)
-    # if date_time_match:
-    #     try:
-    #         return datetime.strptime(
-    #             date_time_match.group(1) + date_time_match.group(2), "%Y%m%d%H%M%S"
-    #         )  # Convert to date
-
-    #     except ValueError:
-    #         return ""
-    # else:
-    #     return ""
-
-    # Wyszukaj datę i godzinę w nazwie pliku
     match = re.search(r"\d{8}_\d{6}", filename)
     if match:
         date_str = match.group()
@@ -37,7 +24,7 @@ def extract_time_from_filename(filename: str):
         time = datetime.strptime(date_str, "%Y%m%d_%H%M%S").time().strftime("%H:%M:%S")
         return date, time
     else:
-        print(f"Nie można wyciągnąć daty i czasu z nazwy pliku: {filename}")
+        print(f"Cannot extract date from filename: {filename}")
         return None, None
 
 
