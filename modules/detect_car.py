@@ -1,11 +1,22 @@
 # v1.01 - car identification using deep learning model
+import os
+
 import torch
 from PIL import Image
 from torch import nn
 from torchvision import transforms
 
 
-def identify(img_path, model_path="detect_car.pth"):
+# def identify(img_path, model_path="..\data\recognition-modeldetect_car.pth")
+def identify(img_path, model_path=None):
+    if model_path is None:
+        model_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "data",
+            "recognition-model",
+            "detect_car.pth",
+        )
     """
     Load a trained model and use it to identify the type of a car in an image.
 
