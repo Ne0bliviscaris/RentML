@@ -1,4 +1,4 @@
-# v1.01 - main streamlit app
+# v1.01 - main streamlit application
 import streamlit as st
 from PIL import Image
 
