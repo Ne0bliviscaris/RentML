@@ -7,12 +7,12 @@ import pandas as pd
 import streamlit as st
 from PIL import Image, ImageOps
 
-import date_extract
-import detect_car as detect
-import export as export
-import ocr
-import preprocessing as pp  # Currently not used - needed for preprocessing
-import view_plot as alt_plot
+import modules.date_extract as date_extract
+import modules.detect_car as detect
+import modules.export as export
+import modules.ocr as ocr
+import modules.preprocessing as pp  # Currently not used - needed for preprocessing
+import modules.view_plot as alt_plot
 
 
 # File upload and image display via Streamlit
