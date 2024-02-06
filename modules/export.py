@@ -1,5 +1,4 @@
-# v1.0
-# Append data to a JSON file
+# v1.01 - Append data to a JSON file
 import json
 from typing import Dict, List, Optional
 
