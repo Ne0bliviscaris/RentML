@@ -1,3 +1,4 @@
+# Module to prepare interactive Altair plot for Streamlit
 import datetime as dt
 import json
 import os
