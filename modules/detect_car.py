@@ -1,4 +1,4 @@
-# v1.01
+# v1.01 - car identification using deep learning model
 import torch
 from PIL import Image
 from torch import nn
