@@ -1,4 +1,4 @@
-# v1.0
+# v1.01 - import file using system file pop-up dialog
 import os
 from tkinter import Tk, filedialog
 
