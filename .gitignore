@@ -211,6 +211,7 @@ bkp detect_car.pth
 detect_car.zip
 dataset/main-dataset.zip
 dataset/training_dataset-optional.zip
+<<<<<<< HEAD
 data/main-dataset/20210818_202919.jpg
 data/main-dataset/20210824_105026.jpg
 data/main-dataset/20210829_185002.jpg
@@ -419,3 +420,5 @@ data/training-dataset/truck/L4H2_20210818_153321.jpg
 data/training-dataset/truck/L4H2_20230630_132011.jpg
 data/training-dataset/truck/L4H2_20230823_102637.jpg
 data/training-dataset/truck/L4H2_20231108_201428.jpg
+=======
+>>>>>>> 8b5ed89df40cd1e8fa4f22d45e2d8a0e1a6d517f
