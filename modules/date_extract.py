@@ -1,4 +1,4 @@
-# v1.01
+# v1.01 - Date and time extraction from picture
 import re
 from datetime import datetime
 
