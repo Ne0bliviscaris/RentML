@@ -12,7 +12,7 @@ from sklearn.linear_model import LinearRegression
 
 
 # Load and transform data in DataFrame
-def load_and_transform_data(json_file="mileage.json") -> pd.DataFrame:
+def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFrame:
     """
     Load data from a JSON file and transform it into a DataFrame.
 
