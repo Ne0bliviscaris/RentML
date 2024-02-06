@@ -1,4 +1,4 @@
 __pycache__/
 data/main-dataset/
 data/training-dataset/
-data/recognition-model/car_detect.pth
+data/recognition-model/detect_car.pth
