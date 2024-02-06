@@ -1,4 +1,4 @@
-# v1.0
+# v1.01 - Mileage extraction using EasyOCR
 import re
 
 import easyocr
