@@ -1,4 +1,4 @@
-# v1.0
+# v1.01 - preprocessing: gamma correction, erosion, edge detection, sharpening
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
