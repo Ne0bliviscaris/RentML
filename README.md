@@ -34,7 +34,9 @@ If Streamlit does not launch properly, make sure terminal is operating within th
 ## Usage <a name = "usage"></a>
 
 Upon launching Streamlit app using ```main.py```, file upload widget can be seen. \
-Below there is Altair chart showing car mileages. You can adjust view of each car using checkboxes above. Click/touch a dot on the chart and pop-up with time and exact mileage will open.
+Below there is Altair chart showing car mileages. You can adjust view of each car using checkboxes above. \
+Hover the chart to see exact time and mileage in each dot.
+
 
 Upon importing file using the widget, imported image will be shown and processing will start. Upon completion, mileage will be shown along with entire record containing information about the image. Data from processed images lands in ```mileage.json``` file.
 
@@ -65,6 +67,6 @@ That's why whole preprocessing is commented out from the program. ```drafts``` f
 │   ├───main-dataset         -dataset of 60 pictures for end-user
 │   ├───recognition-model    -contains a script to generate recognition model and the model itself
 │   └───result               -scanned files are stored in json file inside this folder
-├───drafts                   -place for experiments, testing pre-processing variants and visualization methods
+├───drafts                   -experiments, pre-processing tests and visualization methods
 ├───modules                  -stores all functions used in project
 ```
