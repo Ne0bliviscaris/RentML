@@ -3,3 +3,5 @@ preprocess_folder.ipynb/** linguist-vendored
 downloads.ipynb/** linguist-vendored
 data/recognition-model/** linguist-vendored
 *.ipynb/** linguist-vendored
+drafts/*.ipynb/** linguist-vendored
+data/recognition-model/*.ipynb/** linguist-vendored
