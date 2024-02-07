@@ -9,6 +9,7 @@
 - [Technical challenges](#challenges)
 - [Project structure](#structure)
 - [Lessons learned](#learned)
+- [Author](#author)
 ---
 ## Idea behind the project<a name = "idea"></a>
 Using own prior experience within the field, I came up with a tool, that would make my life easier back in the day.\
@@ -88,3 +89,7 @@ Initially everything beside dataset was located in main folder. Organizing file 
 - Another issue was categorizing cars by their mileages. 2 of 3 cars had extremely simillar mileages, so it was impossible to precisely differentiate them without using machine learning. Copilot provided the code to train my own neural network model with a part of existing dataset. Using that model solved the issue of intertwined mileages, as the model categorized them based on dashboard.
 
 - Commenting every major step in functions provided further understanding and easier navigation within each function.
+
+---
+## Author<a name = "author" />
+Mateusz Ratajczak
