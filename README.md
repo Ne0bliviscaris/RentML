@@ -79,8 +79,12 @@ Therefore I decided to not limit myself with currently posessed knowledge and li
 \
 Having the goal in mind, Kanban board within Github Projects allowed me to divide the idea into tiny pieces, thinking everything through. \
 https://github.com/users/Ne0bliviscaris/projects/2 (currently in polish, will translate it later)
+\
 - First issue with this project was navigation and code readability. Exporting functions to separate files, along with typehints and docstrings enabled me to quickly navigate through it. \
 Initially everything beside dataset was located in main folder. Organizing file structure further improved navigation.
+\
 - Second issue was OCR reading precision. Dataset was not taken with this in mind, so I had to test multiple methods of preprocessing. Big part of the dataset was extremely difficult to read, so I ended up removing them from dataset and commenting out preprocessing functions from main program. Important part here was to decide if it will impact the functionality of the program. Historic data only serve as a background, while reading newly taken pictures is the main program feature. Simply keeping that in mind while taking picture for the program will already solve most readability issues. However, precision of reads from phone camera is still a subject to improve.
+\
 - Another issue was categorizing cars by their mileages. 2 of 3 cars had extremely simillar mileages, so it was impossible to precisely differentiate them without using machine learning. Copilot provided the code to train my own neural network model with a part of existing dataset. Using that model solved the issue of intertwined mileages, as the model categorized them based on dashboard.
-- Commenting every major step in functions provided further understanding and easier navigation within the function
+\
+- Commenting every major step in functions provided further understanding and easier navigation within each function.
