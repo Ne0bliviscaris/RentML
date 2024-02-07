@@ -8,7 +8,7 @@
 - [Libraries used](#libraries)
 - [Technical challenges](#challenges)
 - [Project structure](#structure)
-- [Lessons learned](#structure)
+- [Lessons learned](#learned)
 ---
 ## Idea behind the project<a name = "idea"></a>
 Using own prior experience within the field, I came up with a tool, that would make my life easier back in the day.\
