@@ -1,1 +1,3 @@
-notebooks/** linguist-vendored
+drafts/** linguist-vendored
+preprocess_folder.ipynb/** linguist-vendored
+downloads.ipynb/** linguist-vendored
