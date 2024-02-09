@@ -8,7 +8,8 @@
 - [Libraries used](#libraries)
 - [Technical challenges](#challenges)
 - [Project structure](#structure)
-- [Lessons learned](#structure)
+- [Lessons learned](#learned)
+- [Author](#author)
 ---
 ## Idea behind the project<a name = "idea"></a>
 Using own prior experience within the field, I came up with a tool, that would make my life easier back in the day.\
@@ -75,7 +76,7 @@ That's why whole preprocessing is commented out from the program. ```drafts``` f
 ## Lessons learned<a name = "learned"></a>
 As this was my first project ever, I approached this project with only basic knowledge about python in general. \
 Idea for this project was not suited for my knowledge, but it solves problem I have been facing. \
-Therefore I decided to not limit myself with currently posessed knowledge and limit-test Github Copilot for generating code snippets. \
+Therefore I decided to not limit myself with currently posessed knowledge and limit-test ```Github Copilot``` for generating code snippets.
 
 Having the goal in mind, Kanban board within Github Projects allowed me to divide the idea into tiny pieces, thinking everything through. \
 https://github.com/users/Ne0bliviscaris/projects/2 (currently in polish, will translate it later)
@@ -88,3 +89,7 @@ Initially everything beside dataset was located in main folder. Organizing file 
 - Another issue was categorizing cars by their mileages. 2 of 3 cars had extremely simillar mileages, so it was impossible to precisely differentiate them without using machine learning. Copilot provided the code to train my own neural network model with a part of existing dataset. Using that model solved the issue of intertwined mileages, as the model categorized them based on dashboard.
 
 - Commenting every major step in functions provided further understanding and easier navigation within each function.
+
+---
+## Author<a name = "author" />
+Mateusz Ratajczak
