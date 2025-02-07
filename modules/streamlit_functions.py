@@ -8,25 +8,14 @@ import streamlit as st
 from PIL import Image, ImageOps
 
 import modules.date_extract as date_extract
-import modules.detect_car as detect
 import modules.export as export
 import modules.ocr as ocr
 import modules.preprocessing as pp  # Currently not used - needed for preprocessing
-import modules.view_plot as alt_plot
 
 
 # File upload and image display via Streamlit
-def load_image(uploaded_file) -> np.ndarray:
-    """
-    Load an image from a file, transpose it according to its EXIF orientation tag,
-    display it in Streamlit, and return it as a NumPy array.
-
-    Args:
-        uploaded_file : The file to load the image from. This can be obtained from a Streamlit file_uploader widget.
-
-    Returns:
-        np.ndarray: The loaded image as a NumPy array.
-    """
+def load_image(uploaded_file):
+    """Load an image from a file, and return it as a NumPy array."""
     img = Image.open(uploaded_file)
     img = ImageOps.exif_transpose(img)
     st.image(img, caption="Wybrane zdjęcie", use_column_width=True)
@@ -34,48 +23,20 @@ def load_image(uploaded_file) -> np.ndarray:
 
 
 # OCR and preprocessing - currently preprocessing is skipped
-def process_image(img_cv: np.ndarray):
-    """
-    Process an image by performing OCR on it. Currently, preprocessing is skipped.
-    To enable preprocessing, uncomment lines 50-53
-
-    Args:
-        img_cv (np.ndarray): The image to process.
-
-    Returns:
-        Tuple[np.ndarray, Optional[int]]: A tuple containing the processed image and the mileage
-                                          recognized from the image. If the mileage is not recognized,
-                                          the second element of the tuple is None.
-    """
-    preprocessed_img = img_cv  # Skip preprocessing for now using the original image
-    # preprocessed_img = pp.preprocess(img_cv) # Uncomment to enable preprocessing
-    # st.image( # Uncomment to display the preprocessed image
-    #     preprocessed_img, caption="Zdjęcie po preprocessingu", use_column_width=True
-    # )
-    st.write("Przebieg z ocr:")
-    mileage = ocr.mileage_ocr(preprocessed_img)  # Perform OCR on the image
+def extract_mileage(img):
+    """Perform OCR on image."""
+    st.write("OCR Mileage:")
+    mileage = ocr.mileage_ocr(img)
     if mileage is None:
-        st.write("Przebieg nie został rozpoznany")
+        st.write("Mileage not recognized")
     else:
-        st.write(mileage)
-    return preprocessed_img, mileage
+        st.write(mileage[0])
+    return mileage[0] if mileage is not None else None
 
 
 # Extract data from file and append to JSON file
 def extract_and_append_data(path, mileage, car_type, note=None):
-    """
-    Extract data from file and append it to JSON file.
-
-    Args:
-        path (str): The path of the file to extract data from.
-        mileage (int): The mileage to append to the JSON file.
-        car_type (str): The type of the car to append to the JSON file.
-        note (str, optional): The note to append to the JSON file. Empty by default.
-
-    Returns:
-        Optional[str]: A message indicating that the file already exists in the JSON file,
-                       if it does. Otherwise, None.
-    """
+    """Extract data from file and append it to JSON file."""
     # Check if JSON file is empty
     if os.path.getsize("data/result/mileage.json") == 0:
         rep_check = []
@@ -111,9 +72,6 @@ def load_and_display_data(path: str) -> None:
     """
     Load data from a JSON file, display the record associated with a specific path in Streamlit,
     Optionally display all records in the JSON file in Streamlit as a DataFrame. (currently commented out)
-
-    Args:
-        path (str): The path of the file to find the associated record for.
     """
     with open("data/result/mileage.json", "r") as f:
         data = json.load(f)
