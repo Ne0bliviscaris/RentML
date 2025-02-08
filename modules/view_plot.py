@@ -191,3 +191,9 @@ def prepare_plot():
     except Exception as e:
         st.error(f"Error in prepare_plot: {str(e)}")
         return None
+
+
+def show_altair_chart():
+    chart = prepare_plot()
+    if chart:
+        st.altair_chart(chart)
