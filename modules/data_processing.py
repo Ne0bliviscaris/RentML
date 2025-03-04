@@ -51,7 +51,7 @@ def is_duplicate(data, new_record):
     return False
 
 
-def append_to_json(file_path=None, date=None, time=None, mileage=None, car_type=None, note=None):
+def append_to_json(file_path=None, date=None, time=None, mileage=None, car=None, note=None):
     """Extract data from file and append it to JSON file."""
     # Check if JSON file is empty
     record = {
@@ -59,7 +59,7 @@ def append_to_json(file_path=None, date=None, time=None, mileage=None, car_type=
         "Date": str(date),
         "Time": str(time),
         "Mileage": mileage,
-        "Car type": car_type,
+        "Car": car.name,
         "Notes": note or "",
     }
 

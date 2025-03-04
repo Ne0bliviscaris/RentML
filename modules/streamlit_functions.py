@@ -1,10 +1,10 @@
 from datetime import datetime
 
-import pandas as pd
 import streamlit as st
 
-import modules.data_processing as sf
-from modules.handover_protocol import print_handover_protocol
+from modules.cars import Car
+from modules.data_processing import append_to_json
+from modules.docs_generator import generate_handover_protocol
 
 
 def uploader():
@@ -30,7 +30,7 @@ def confirmation_form(data=None):
         with col1:
             submitted = st.form_submit_button("Zapisz")
             if submitted:
-                success = sf.append_to_json(
+                success = append_to_json(
                     file_path=None, mileage=mileage, car_type=car, date=date, time=time, note=notes
                 )
                 if success:
@@ -42,7 +42,8 @@ def confirmation_form(data=None):
         with col2:
             handover = st.form_submit_button("Print Handover Protocol")
             if handover:
-                print_handover_protocol(mileage=mileage, car_type=car, date=date, time=time, note=notes)
+                generate_handover_protocol(mileage=mileage, car=car, date=date, time=time, note=notes)
+                st.popover("Protokół zwrotu wygenerowany")
 
 
 def editable_mileage_field(mileage):
@@ -72,13 +73,18 @@ def editable_notes_field():
 
 def editable_car_selector(car_type):
     """Display car type selector with default selection based on input value."""
-    car_options = ["Dostawczy L3H2", "Osobowy", "Dostawczy L4H2"]
+    all_cars = Car.get_all_cars()
+    cars_list = [car.name for car in all_cars]
 
-    if car_type == "car":
-        default_index = 1  # "Osobowy"
-    elif car_type == "truck":
-        default_index = 0  # "Dostawczy L3H2"
+    if car_type == "Osobowy":
+        default_index = next((i for i, car in enumerate(all_cars) if "Osobowy" in car.car_type), 0)
+    elif car_type == "Dostawczy":
+        default_index = next((i for i, car in enumerate(all_cars) if "Dostawczy" in car.car_type), 0)
     else:
-        default_index = 0  # Default to first option if unknown
+        default_index = 0
 
-    return st.selectbox("Typ pojazdu", options=car_options, index=default_index)
+    selected_name = st.selectbox("Samochód", options=cars_list, index=default_index)
+
+    # Return the full Car object
+    selected_car = next((car for car in all_cars if car.name == selected_name), all_cars[0])
+    return selected_car
