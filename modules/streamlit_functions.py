@@ -70,7 +70,15 @@ def editable_notes_field():
     return st.text_area("Notatki", value="")
 
 
-def editable_car_selector(car):
-    return st.selectbox(
-        "Select car", options=["Osobowy", "Dostawczy L3H2", "Dostawczy L4H2"], index=1 if car == "Osobowy" else 0
-    )
+def editable_car_selector(car_type):
+    """Display car type selector with default selection based on input value."""
+    car_options = ["Dostawczy L3H2", "Osobowy", "Dostawczy L4H2"]
+
+    if car_type == "car":
+        default_index = 1  # "Osobowy"
+    elif car_type == "truck":
+        default_index = 0  # "Dostawczy L3H2"
+    else:
+        default_index = 0  # Default to first option if unknown
+
+    return st.selectbox("Typ pojazdu", options=car_options, index=default_index)
