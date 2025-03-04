@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import streamlit as st
@@ -42,8 +43,13 @@ def confirmation_form(data=None):
         with col2:
             handover = st.form_submit_button("Print Handover Protocol")
             if handover:
-                generate_handover_protocol(mileage=mileage, car=car, date=date, time=time, note=notes)
-                st.popover("Protokół zwrotu wygenerowany")
+                protocol = generate_handover_protocol(mileage=mileage, car=car, date=date, time=time, note=notes)
+                open_file(protocol)
+                st.success("Protokół zwrotu wygenerowany")
+
+
+def open_file(file_path):
+    os.startfile(file_path)
 
 
 def editable_mileage_field(mileage):

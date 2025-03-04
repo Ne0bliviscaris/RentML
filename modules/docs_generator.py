@@ -29,3 +29,4 @@ def generate_handover_protocol(mileage=None, car=None, date=None, time=None, not
 
     doc.render(protocol_content)
     doc.save(OUTPUT_PATH)
+    return OUTPUT_PATH
