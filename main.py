@@ -14,6 +14,7 @@ st.set_page_config(page_title="Car Mileage Analysis", page_icon="🚗")
 def image_processing():
     """Left column handles image upload and preview."""
     st.session_state.image = uploader()
+
     if st.session_state.image:
         st.image(st.session_state.image, use_column_width=True)
         # preprocessed_img = preprocess(img)  #Potential image preprocessing here
@@ -36,8 +37,7 @@ def main():
         image_processing()
 
     with right_col:
-        if st.session_state.extracted_data is not None:
-            confirmation_form(st.session_state.extracted_data)
+        confirmation_form(st.session_state.extracted_data)
 
     # show_altair_chart()
 

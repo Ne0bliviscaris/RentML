@@ -14,9 +14,9 @@ def uploader():
     return st.file_uploader("Dodaj zdjęcie", type=["jpg", "png", "jpeg", "gif"])
 
 
-def confirmation_form(data):
+def confirmation_form(data=None):
     """Display editable form with pre-filled mileage and car type."""
-    mileage, car, date, time = data
+    mileage, car, date, time = data if data else (None, None, None, None)
 
     with st.form("Potwierdzenie danych", clear_on_submit=True, border=0):
         # Edytowalny przebieg
