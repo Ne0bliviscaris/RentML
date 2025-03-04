@@ -29,7 +29,7 @@ def build_model():
 
 def make_prediction(image, model):
     """Make a prediction using the model. Model returns 0 or 1"""
-    car_types = {0: "truck", 1: "car"}
+    car_types = {0: "Dostawczy", 1: "Osobowy"}
     # Make a prediction
     with torch.no_grad():
         output = model(image)
