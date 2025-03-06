@@ -1,125 +1,96 @@
-# v1.01 - main streamlit application functions
-import json
 import os
+from datetime import datetime
 
-import numpy as np
-import pandas as pd
 import streamlit as st
-from PIL import Image, ImageOps
 
-import modules.date_extract as date_extract
-import modules.detect_car as detect
-import modules.export as export
-import modules.ocr as ocr
-import modules.preprocessing as pp  # Currently not used - needed for preprocessing
-import modules.view_plot as alt_plot
+from modules.cars import Car
+from modules.data_processing import append_to_json
+from modules.docs_generator import generate_handover_protocol
 
 
-# File upload and image display via Streamlit
-def load_image(uploaded_file) -> np.ndarray:
-    """
-    Load an image from a file, transpose it according to its EXIF orientation tag,
-    display it in Streamlit, and return it as a NumPy array.
-
-    Args:
-        uploaded_file : The file to load the image from. This can be obtained from a Streamlit file_uploader widget.
-
-    Returns:
-        np.ndarray: The loaded image as a NumPy array.
-    """
-    img = Image.open(uploaded_file)
-    img = ImageOps.exif_transpose(img)
-    st.image(img, caption="Wybrane zdjęcie", use_column_width=True)
-    return np.array(img)
+def uploader():
+    # if st.button("Camera"):
+    #     return st.camera_input("Take a photo")
+    # if st.button("Upload image"):
+    return st.file_uploader("Dodaj zdjęcie", type=["jpg", "png", "jpeg", "gif"])
 
 
-# OCR and preprocessing - currently preprocessing is skipped
-def process_image(img_cv: np.ndarray):
-    """
-    Process an image by performing OCR on it. Currently, preprocessing is skipped.
-    To enable preprocessing, uncomment lines 50-53
+def confirmation_form(data=None):
+    """Display editable form with pre-filled mileage and car type."""
+    mileage, car, date, time = data if data else (None, None, None, None)
 
-    Args:
-        img_cv (np.ndarray): The image to process.
+    with st.form("Potwierdzenie danych", clear_on_submit=True, border=0):
+        # Edytowalny przebieg
+        mileage = editable_mileage_field(mileage)
+        car = editable_car_selector(car)
+        date = editable_date_field(date)
+        time = editable_time_field(time)
+        notes = editable_notes_field()
 
-    Returns:
-        Tuple[np.ndarray, Optional[int]]: A tuple containing the processed image and the mileage
-                                          recognized from the image. If the mileage is not recognized,
-                                          the second element of the tuple is None.
-    """
-    preprocessed_img = img_cv  # Skip preprocessing for now using the original image
-    # preprocessed_img = pp.preprocess(img_cv) # Uncomment to enable preprocessing
-    # st.image( # Uncomment to display the preprocessed image
-    #     preprocessed_img, caption="Zdjęcie po preprocessingu", use_column_width=True
-    # )
-    st.write("Przebieg z ocr:")
-    mileage = ocr.mileage_ocr(preprocessed_img)  # Perform OCR on the image
-    if mileage is None:
-        st.write("Przebieg nie został rozpoznany")
+        col1, col2 = st.columns(2)
+        with col1:
+            submitted = st.form_submit_button("Zapisz")
+            if submitted:
+                success = append_to_json(
+                    file_path=None, mileage=mileage, car_type=car, date=date, time=time, note=notes
+                )
+                if success:
+                    st.success("Zapisano dane")
+                    st.session_state.form_submitted = True
+                else:
+                    st.warning("Dane istnieją już w bazie. Zaktualizowano notatkę.")
+
+        with col2:
+            handover = st.form_submit_button("Print Handover Protocol")
+            if handover:
+                protocol = generate_handover_protocol(mileage=mileage, car=car, date=date, time=time, note=notes)
+                open_file(protocol)
+                st.success("Protokół zwrotu wygenerowany")
+
+
+def open_file(file_path):
+    os.startfile(file_path)
+
+
+def editable_mileage_field(mileage):
+    return st.number_input("Przebieg", min_value=0, max_value=999999, value=int(mileage) if mileage else 0, step=1)
+
+
+def editable_date_field(date_str):
+    try:
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        date = datetime.now().date()
+    return st.date_input("Data", value=date)
+
+
+def editable_time_field(time_str):
+    """Display editable time input field."""
+    try:
+        time = datetime.strptime(time_str, "%H:%M:%S").time()
+    except:
+        time = datetime.now().time()
+    return st.time_input("Godzina", value=time)
+
+
+def editable_notes_field():
+    return st.text_area("Notatki", value="")
+
+
+def editable_car_selector(car_type):
+    """Display car type selector with default selection based on input value."""
+    all_cars = Car.get_all_cars()
+    cars_list = [car.name for car in all_cars]
+
+    if car_type == "Osobowy":
+        default_index = next((i for i, car in enumerate(all_cars) if "Osobowy" in car.car_type), 0)
+    elif car_type == "Dostawczy":
+        default_index = next((i for i, car in enumerate(all_cars) if "Dostawczy" in car.car_type), 0)
     else:
-        st.write(mileage)
-    return preprocessed_img, mileage
+        default_index = 0
 
+    selected_name = st.selectbox("Samochód", options=cars_list, index=default_index)
 
-# Extract data from file and append to JSON file
-def extract_and_append_data(path, mileage, car_type, note=None):
-    """
-    Extract data from file and append it to JSON file.
-
-    Args:
-        path (str): The path of the file to extract data from.
-        mileage (int): The mileage to append to the JSON file.
-        car_type (str): The type of the car to append to the JSON file.
-        note (str, optional): The note to append to the JSON file. Empty by default.
-
-    Returns:
-        Optional[str]: A message indicating that the file already exists in the JSON file,
-                       if it does. Otherwise, None.
-    """
-    # Check if JSON file is empty
-    if os.path.getsize("data/result/mileage.json") == 0:
-        rep_check = []
-    else:
-        # Read the JSON file
-        with open("data/result/mileage.json", "r") as f:
-            rep_check = json.load(f)
-
-    # Check if the file is already in the JSON file
-    for entry in rep_check:
-        if entry["Filename"] == path:
-            return f"File {path} already exists."
-
-    # Extract date and time from filename
-    date, time = date_extract.extract_time_from_filename(path)
-    export.append_to_json(
-        "data/result/mileage.json",
-        [
-            {
-                "Filename": path,
-                "Date": date,
-                "Time": time,
-                "Mileage": str(mileage),
-                "Type": car_type,
-                "Notes": note,
-            }
-        ],
-    )
-
-
-# Load and display data from JSON file in Streamlit as a DataFrame
-def load_and_display_data(path: str) -> None:
-    """
-    Load data from a JSON file, display the record associated with a specific path in Streamlit,
-    Optionally display all records in the JSON file in Streamlit as a DataFrame. (currently commented out)
-
-    Args:
-        path (str): The path of the file to find the associated record for.
-    """
-    with open("data/result/mileage.json", "r") as f:
-        data = json.load(f)
-    df = pd.DataFrame(data)
-    st.write("Rekord powiązany ze zdjęciem:")
-    record = df[df["Filename"] == path]
-    st.write(record)
-    # st.write("Wszystkie rekordy w pliku:")
-    # st.dataframe(df)
+    # Return the full Car object
+    selected_car = next((car for car in all_cars if car.name == selected_name), all_cars[0])
+    return selected_car

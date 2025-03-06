@@ -5,3 +5,4 @@ data/recognition-model/detect_car.pth
 
 data/result/mileage.json
 data/result/mileage.json
+modules/data

@@ -1,28 +1,54 @@
 # v1.01 - main streamlit application
+import os
+import subprocess
+
 import streamlit as st
-from PIL import Image
 
-import modules.date_extract as date_extract
-import modules.detect_car as detect
-import modules.export as export
-import modules.ocr as ocr
-import modules.streamlit_functions as sf
-import modules.view_plot as alt_plot
+from modules.data_processing import extract_data
+from modules.streamlit_functions import confirmation_form, uploader
+from modules.view_plot import show_altair_chart
 
-# Streamlit app
-# File uploader widget
-uploaded_file = st.file_uploader("Wybierz plik", type=["jpg", "png"])
+st.set_page_config(page_title="Car Mileage Analysis", page_icon="🚗")
 
-# Continue only if file is uploaded
-if uploaded_file is not None:
-    path = f"data\\main-dataset\\{uploaded_file.name}"
-    img_cv = sf.load_image(uploaded_file)
-    preprocessed_img, mileage = sf.process_image(img_cv)
-    car_type = detect.identify(img_path=path)
-    sf.extract_and_append_data(path, mileage, car_type)
-    sf.load_and_display_data(path)
 
-# Generate and display an Altair chart
-chart = alt_plot.prepare_plot()
-if chart:
-    st.altair_chart(chart)
+def image_processing():
+    """Left column handles image upload and preview."""
+    st.session_state.image = uploader()
+
+    if st.session_state.image:
+        st.image(st.session_state.image, use_column_width=True)
+        # preprocessed_img = preprocess(img)  #Potential image preprocessing here
+        if not st.session_state.image_processed:
+            st.session_state.extracted_data = extract_data(st.session_state.image)
+            st.session_state.image_processed = True
+
+
+def main():
+    if "image" not in st.session_state:
+        st.session_state.image = None
+    if "image_processed" not in st.session_state:
+        st.session_state.image_processed = False
+    if "extracted_data" not in st.session_state:
+        st.session_state.extracted_data = None
+
+    left_col, right_col = st.columns(2)
+
+    with left_col:
+        image_processing()
+
+    with right_col:
+        confirmation_form(st.session_state.extracted_data)
+
+    # show_altair_chart()
+
+
+if __name__ == "__main__":
+    if not os.environ.get("RUNNING"):
+        # Mark streamlit as running
+        os.environ["RUNNING"] = "1"
+        # Get file path
+        file_path = os.path.abspath(__file__)
+        # Run streamlit in a new process
+        subprocess.run(f"streamlit run {file_path}")
+    else:
+        main()

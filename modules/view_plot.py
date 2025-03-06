@@ -39,9 +39,7 @@ def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFram
     df["Date"] = pd.to_datetime(df["Date"])
 
     # Remove square brackets and quotation marks from 'Mileage' column
-    df["Mileage"] = df["Mileage"].apply(
-        lambda x: x.replace("[", "").replace("]", "").replace("'", "")
-    )
+    df["Mileage"] = df["Mileage"].apply(lambda x: x.replace("[", "").replace("]", "").replace("'", ""))
 
     # Convert 'Mileage' column to numeric format
     df["Mileage"] = df["Mileage"].astype(int)
@@ -125,36 +123,23 @@ def create_class_column(car, l3h2, l4h2, df):
     return df
 
 
-# Create Altair chart
 def altair_chart(df) -> alt.Chart:
-    """
-    Create an Altair chart from the DataFrame.
+    """Create an Altair chart from the DataFrame with error handling."""
+    try:
+        base = alt.Chart(df).properties(width=720)
 
-    The function creates a scatter plot with circles as markers. The x-axis represents the 'Date' and the y-axis represents the 'Mileage'.
-    The color of the circles is determined by the 'class' column. The tooltip shows the 'Date', 'Mileage' and 'class' of the data points.
-
-    Args:
-        df (DataFrame): The input DataFrame.
-
-    Returns:
-        alt.Chart: The created Altair chart.
-    """
-    chart = (
-        alt.Chart(df)
-        .mark_circle(size=100)
-        .encode(
-            x="Date:T",
-            y=alt.Y(
-                "Mileage:Q",
-                scale=alt.Scale(domain=(240000, max(5000 + df["Mileage"]))),
-            ),
+        chart = base.mark_circle(size=100).encode(
+            x=alt.X("Date:T"),
+            y=alt.Y("Mileage:Q", scale=alt.Scale(domain=[240000, df["Mileage"].max() + 5000])),
             color="class:N",
             tooltip=["Date", "Mileage", "class"],
         )
-        .properties(width=720)  # , height=400)  # Adjust chart size
-    )
 
-    return chart
+        return chart
+
+    except Exception as e:
+        st.error(f"Error creating chart: {str(e)}")
+        return None
 
 
 # Create checkboxes for each class with pre-selected class
@@ -179,38 +164,36 @@ def display_checkboxes(df, pre_selected_class=None):
         selected_classes = [st.checkbox(c, True) for c in classes]
     else:
         selected_classes = [st.checkbox(c, c == pre_selected_class) for c in classes]
-    filtered_df = df[
-        df["class"].isin(
-            [c for c, selected in zip(classes, selected_classes) if selected]
-        )
-    ]
+    filtered_df = df[df["class"].isin([c for c, selected in zip(classes, selected_classes) if selected])]
     return filtered_df
 
 
 # Main function - prepare plot with Altair library for Streamlit
-def prepare_plot() -> alt.Chart:
-    """
-    Prepare an Altair chart from the data.
+def prepare_plot():
+    """Prepare an Altair chart from the data with error handling."""
+    try:
+        df = load_and_transform_data()
+        if df.empty:
+            return st.write("No data")
 
-    The function performs the following steps:
-    - Loads and transforms data from a JSON file
-    - Extracts 3 groups from the DataFrame
-    - Creates a 'class' column in the DataFrame
-    - Displays checkboxes for each unique class in the DataFrame and filters the DataFrame based on the selected checkboxes
-    - If the filtered DataFrame is not empty, creates an Altair chart from the DataFrame
+        df, car, l3h2, l4h2 = extract_groups(df)
+        new_df = create_class_column(df, car, l3h2, l4h2)
+        filtered_df = display_checkboxes(new_df)
 
-    Returns:
-        alt.Chart: The created Altair chart. If the filtered DataFrame is empty, a message "No data selected" is displayed instead.
-    """
-    df = load_and_transform_data()
-    if df.empty:
-        return st.write("No data")
+        if filtered_df.empty:
+            return st.write("No data selected")
 
-    df, car, l3h2, l4h2 = extract_groups(df)
-    new_df = create_class_column(df, car, l3h2, l4h2)
-    filtered_df = display_checkboxes(new_df)
+        chart = altair_chart(filtered_df)
+        if chart is not None:
+            return chart
+        return st.write("Error creating chart")
 
-    if filtered_df.empty:
-        return st.write("No data")
-    else:
-        return altair_chart(filtered_df)
+    except Exception as e:
+        st.error(f"Error in prepare_plot: {str(e)}")
+        return None
+
+
+def show_altair_chart():
+    chart = prepare_plot()
+    if chart:
+        st.altair_chart(chart)
