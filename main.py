@@ -1,14 +1,19 @@
-# v1.01 - main streamlit application
 import os
 import subprocess
 
 import streamlit as st
 
-from modules.data_processing import extract_data
 from modules.streamlit_functions import confirmation_form, uploader
 from modules.view_plot import show_altair_chart
 
 st.set_page_config(page_title="Car Mileage Analysis", page_icon="🚗")
+
+
+def lazy_load_extract_data(image):
+    """Lazy load data extraction function."""
+    from modules.data_processing import extract_data
+
+    return extract_data(image)
 
 
 def image_processing():
@@ -19,7 +24,7 @@ def image_processing():
         st.image(st.session_state.image, use_column_width=True)
         # preprocessed_img = preprocess(img)  #Potential image preprocessing here
         if not st.session_state.image_processed:
-            st.session_state.extracted_data = extract_data(st.session_state.image)
+            st.session_state.extracted_data = lazy_load_extract_data(st.session_state.image)
             st.session_state.image_processed = True
 
 
