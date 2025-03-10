@@ -3,6 +3,7 @@ import json
 import modules.detection_model as detection_model
 import modules.ocr as ocr
 from modules.date import read_datetime
+from modules.settings import JSON_FILE
 
 
 def extract_data(image) -> list[int, str]:
@@ -21,7 +22,7 @@ def read_mileage(img):
 def open_json():
     """Read JSON file or return empty list."""
     try:
-        with open("modules\\data\\mileage.json", "r") as file:
+        with open(JSON_FILE, "r") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
@@ -30,7 +31,7 @@ def open_json():
 def save_json(data):
     """Save data to JSON file."""
     try:
-        with open("modules\\data\\mileage.json", "w") as file:
+        with open(JSON_FILE, "w") as file:
             json.dump(data, file, indent=4)
         return True
     except Exception as e:

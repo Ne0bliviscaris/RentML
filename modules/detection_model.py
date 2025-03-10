@@ -4,8 +4,7 @@ from torch import nn
 from torchvision import transforms
 
 torch.classes.__path__ = []
-
-MODEL_PATH = "data/recognition-model/detect_car.pth"
+from modules.settings import CAR_TYPES, MODEL_PATH
 
 
 def build_model():
@@ -30,12 +29,10 @@ def build_model():
 
 def make_prediction(image, model):
     """Make a prediction using the model. Model returns 0 or 1"""
-    car_types = {0: "Dostawczy", 1: "Osobowy"}
-    # Make a prediction
     with torch.no_grad():
         output = model(image)
         _, predicted = torch.max(output, dim=1)
-    return car_types[predicted.item()]
+    return CAR_TYPES[predicted.item()]
 
 
 def load_image(image):
