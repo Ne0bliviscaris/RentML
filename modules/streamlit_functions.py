@@ -21,11 +21,11 @@ def confirmation_form(data=None):
 
     with st.form("Potwierdzenie danych", clear_on_submit=True, border=0):
         # Edytowalny przebieg
-        mileage = editable_mileage_field(mileage)
-        car = editable_car_selector(car)
-        date = editable_date_field(date)
-        time = editable_time_field(time)
-        notes = editable_notes_field()
+        mileage = mileage_field(mileage)
+        car = car_selector(car)
+        date = date_field(date)
+        time = time_field(time)
+        notes = notes_field()
 
         col1, col2 = st.columns(2)
         with col1:
@@ -52,11 +52,11 @@ def open_file(file_path):
     os.startfile(file_path)
 
 
-def editable_mileage_field(mileage):
+def mileage_field(mileage):
     return st.number_input("Przebieg", min_value=0, max_value=999999, value=int(mileage) if mileage else 0, step=1)
 
 
-def editable_date_field(date_str):
+def date_field(date_str):
     try:
         date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except (ValueError, TypeError):
@@ -64,7 +64,7 @@ def editable_date_field(date_str):
     return st.date_input("Data", value=date)
 
 
-def editable_time_field(time_str):
+def time_field(time_str):
     """Display editable time input field."""
     try:
         time = datetime.strptime(time_str, "%H:%M:%S").time()
@@ -73,11 +73,11 @@ def editable_time_field(time_str):
     return st.time_input("Godzina", value=time)
 
 
-def editable_notes_field():
+def notes_field():
     return st.text_area("Notatki", value="")
 
 
-def editable_car_selector(car_type):
+def car_selector(car_type):
     """Display car type selector with default selection based on input value."""
     all_cars = Car.get_all_cars()
     cars_list = [car.name for car in all_cars]
