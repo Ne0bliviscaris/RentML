@@ -10,9 +10,11 @@ import streamlit as st
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
+from modules.settings import OLD_JSON_FILE
+
 
 # Load and transform data in DataFrame
-def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFrame:
+def load_and_transform_data() -> pd.DataFrame:
     """
     Load data from a JSON file and transform it into a DataFrame.
 
@@ -24,16 +26,7 @@ def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFram
     Returns:
         DataFrame: The transformed data.
     """
-    if not os.path.exists(json_file):
-        return pd.DataFrame()
-
-    with open(json_file, "r") as f:
-        data = json.load(f)
-
-    df = pd.DataFrame(data)
-
-    # Load data from JSON file
-    df = pd.read_json(json_file)
+    df = pd.read_json(OLD_JSON_FILE) if os.path.exists(OLD_JSON_FILE) else pd.DataFrame()
 
     df["Date"] = pd.to_datetime(df["Date"])
     # Remove square brackets and quotation marks from 'Mileage' column
