@@ -4,7 +4,6 @@ import subprocess
 import streamlit as st
 
 from modules.streamlit_functions import confirmation_form, uploader
-from modules.view_plot import show_altair_chart
 
 st.set_page_config(page_title="Car Mileage Analysis", page_icon="🚗")
 
