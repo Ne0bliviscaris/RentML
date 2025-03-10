@@ -43,8 +43,6 @@ def main():
     with right_col:
         confirmation_form(st.session_state.extracted_data)
 
-    # show_altair_chart()
-
 
 if __name__ == "__main__":
     if not os.environ.get("RUNNING"):

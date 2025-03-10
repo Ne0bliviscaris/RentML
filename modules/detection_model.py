@@ -5,10 +5,11 @@ from torchvision import transforms
 
 torch.classes.__path__ = []
 
+MODEL_PATH = "data/recognition-model/detect_car.pth"
+
 
 def build_model():
     """Build a deep learning model to identify the type of a car in an image."""
-    model_path = "data/recognition-model/detect_car.pth"
     model = nn.Sequential(
         nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1),  # Convolutional layer
         nn.ReLU(),  # Activation function
@@ -22,7 +23,7 @@ def build_model():
         nn.Linear(128, 2),  # Output layer
     )
     # Load the trained model
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(MODEL_PATH))
     model.eval()  # Set the model to evaluation mode
     return model
 

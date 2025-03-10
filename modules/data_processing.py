@@ -1,6 +1,6 @@
 import json
 
-import modules.detection_model as detect
+import modules.detection_model as detection_model
 import modules.ocr as ocr
 from modules.date import read_datetime
 
@@ -8,7 +8,7 @@ from modules.date import read_datetime
 def extract_data(image) -> list[int, str]:
     if image is not None:
         mileage = read_mileage(image)
-        car_type = detect.identify_car(image)
+        car_type = detection_model.identify_car(image)
         date, time = read_datetime(image)
         return [mileage, car_type, date, time]
 
