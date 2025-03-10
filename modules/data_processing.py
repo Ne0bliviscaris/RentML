@@ -6,11 +6,10 @@ from modules.date import read_datetime
 
 
 def extract_data(image) -> list[int, str]:
-    if image is not None:
-        mileage = read_mileage(image)
-        car_type = detection_model.identify_car(image)
-        date, time = read_datetime(image)
-        return [mileage, car_type, date, time]
+    mileage = read_mileage(image)
+    car_type = detection_model.identify_car(image)
+    date, time = read_datetime(image)
+    return [mileage, car_type, date, time]
 
 
 def read_mileage(img):
@@ -53,13 +52,12 @@ def is_duplicate(data, new_record):
 
 def append_to_json(file_path=None, date=None, time=None, mileage=None, car=None, note=None):
     """Extract data from file and append it to JSON file."""
-    # Check if JSON file is empty
     record = {
         "Filename": file_path,
         "Date": str(date),
         "Time": str(time),
         "Mileage": mileage,
-        "Car": car.name,
+        "Car": car,
         "Notes": note or "",
     }
 
