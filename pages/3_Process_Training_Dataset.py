@@ -5,9 +5,7 @@ import shutil
 import streamlit as st
 
 from modules.data_processing import extract_data
-from modules.settings import MULTI_READ, TRAINING_DATASET, UNREADABLE
-
-TRAINING_JSON = "modules\\data\\training_dataset.json"
+from modules.settings import MULTI_READ, TRAINING_DATASET, TRAINING_JSON, UNREADABLE
 
 
 def process_training_dataset() -> None:
