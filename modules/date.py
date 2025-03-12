@@ -11,7 +11,7 @@ def read_datetime(uploaded_image) -> tuple[str, str]:
     date, time = time_from_metadata(uploaded_image)
 
     if date is None or time is None:
-        date, time = time_from_filename(uploaded_image.name)
+        date, time = time_from_filename(uploaded_image)
 
     if date is None or time is None:
         date = datetime.now().strftime("%Y-%m-%d")
