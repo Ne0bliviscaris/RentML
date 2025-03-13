@@ -68,27 +68,43 @@ def identify_car(df, clustered_df):
     return result_df
 
 
-def visualize(df, legend_column="Car type", y_column="Mileage", trend_column=None):
+def visualize(df, legend_column="Car type", trend_column=None):
     """Create interactive visualization with flexible configuration."""
     selection = alt.selection_point(fields=[legend_column], bind="legend")
 
-    y_domain = [df[y_column].min() * 0.95, df[y_column].max() * 1.05]
+    y_column = "Mileage"
+    y_min = df[y_column].min() * 0.95
+    y_max = df[y_column].max() * 1.05
+    y_range = [y_min, y_max]
 
-    base = alt.Chart(df).encode(
+    chart_width = 800
+    chart_height = 400
+    point_size = 120
+    trend_color = "red"
+
+    formatted_mileage = alt.Tooltip(y_column, format=" ,")
+    tooltip_fields = {"Date": "Date", "Mileage": formatted_mileage, "Type": legend_column}
+
+    if "Notes" in df.columns:
+        tooltip_fields["Notes"] = "Notes"
+
+    base_chart = alt.Chart(df).encode(
         x=alt.X("Date:T", title="Date"),
-        y=alt.Y(f"{y_column}:Q", title=y_column, scale=alt.Scale(domain=y_domain)),
-        tooltip=["Date", y_column, legend_column],
+        y=alt.Y(f"{y_column}:Q", title=y_column, scale=alt.Scale(domain=y_range)),
+        tooltip=list(tooltip_fields.values()),
     )
 
-    points = base.mark_circle(size=120).encode(
+    points = base_chart.mark_circle(size=point_size).encode(
         color=alt.Color(f"{legend_column}:N", legend=alt.Legend(title=legend_column)),
         opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
     )
 
-    chart = points.properties(width=800, height=400).add_params(selection)
+    chart = points.properties(width=chart_width, height=chart_height).add_params(selection)
 
     if trend_column:
-        trend_line = base.mark_line(color="red").encode(y=alt.Y(f"{trend_column}:Q", scale=alt.Scale(domain=y_domain)))
+        trend_line = base_chart.mark_line(color=trend_color).encode(
+            y=alt.Y(f"{trend_column}:Q", scale=alt.Scale(domain=y_range))
+        )
         chart = chart + trend_line
 
     return chart
