@@ -55,56 +55,53 @@ def cluster_by_distance_from_trend(df, trend):
 
 def identify_car(df, clustered_df):
     """Identify car subtypes based on clustering results."""
-    result_df = df.copy()
-    result_df["Car"] = "Scudo"
+    df["Car"] = "Scudo"
 
     cluster = clustered_df["group"]
     l4h2 = clustered_df[cluster == 0].index
     l3h2 = clustered_df[cluster == 1].index
 
-    result_df.loc[l4h2, "Car"] = "L4H2"
-    result_df.loc[l3h2, "Car"] = "L3H2"
+    df.loc[l4h2, "Car"] = "L4H2"
+    df.loc[l3h2, "Car"] = "L3H2"
 
-    return result_df
+    return df
 
 
 def visualize(df, legend_column="Car type", trend_column=None):
     """Create interactive visualization with flexible configuration."""
-    selection = alt.selection_point(fields=[legend_column], bind="legend")
 
-    y_column = "Mileage"
-    y_min = df[y_column].min() * 0.95
-    y_max = df[y_column].max() * 1.05
-    y_range = [y_min, y_max]
+    mileage = "Mileage"
+    y_min = df[mileage].min() * 0.95
+    y_max = df[mileage].max() * 1.05
+    y_scale = alt.Scale(domain=[y_min, y_max])
 
-    chart_width = 800
-    chart_height = 400
-    point_size = 120
-    trend_color = "red"
-
-    formatted_mileage = alt.Tooltip(y_column, format=" ,")
-    tooltip_fields = {"Date": "Date", "Mileage": formatted_mileage, "Type": legend_column}
+    date = alt.Tooltip("Date:T")
+    formatted_mileage = alt.Tooltip(mileage, format=" ,")
+    car_type = alt.Tooltip(f"{legend_column}:N")
+    tooltip_fields = [date, formatted_mileage, car_type]
 
     if "Notes" in df.columns:
-        tooltip_fields["Notes"] = "Notes"
+        notes = alt.Tooltip("Notes:N")
+        tooltip_fields.append(notes)
 
     base_chart = alt.Chart(df).encode(
         x=alt.X("Date:T", title="Date"),
-        y=alt.Y(f"{y_column}:Q", title=y_column, scale=alt.Scale(domain=y_range)),
-        tooltip=list(tooltip_fields.values()),
+        y=alt.Y(f"{mileage}:Q", title=mileage, scale=y_scale),
+        tooltip=tooltip_fields,
     )
 
-    points = base_chart.mark_circle(size=point_size).encode(
-        color=alt.Color(f"{legend_column}:N", legend=alt.Legend(title=legend_column)),
-        opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
-    )
+    point_colors = alt.Color(f"{legend_column}:N")
+    legend = alt.selection_point(fields=[legend_column], bind="legend")
+    visible = alt.value(1)
+    hidden = alt.value(0.2)
+    points_opacity = alt.condition(predicate=legend, if_true=visible, if_false=hidden)
 
-    chart = points.properties(width=chart_width, height=chart_height).add_params(selection)
+    points = base_chart.mark_circle(size=200).encode(color=point_colors, opacity=points_opacity)
+    chart = points.properties(width=800, height=400).add_params(legend)
 
     if trend_column:
-        trend_line = base_chart.mark_line(color=trend_color).encode(
-            y=alt.Y(f"{trend_column}:Q", scale=alt.Scale(domain=y_range))
-        )
+        trend_values = alt.Y(f"{trend_column}:Q")
+        trend_line = base_chart.mark_line(color="red").encode(y=trend_values)
         chart = chart + trend_line
 
     return chart
