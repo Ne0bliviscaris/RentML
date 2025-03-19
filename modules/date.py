@@ -1,9 +1,6 @@
 import re
-from datetime import datetime
 
 import pandas as pd
-from PIL import Image
-from PIL.ExifTags import TAGS
 
 
 def read_datetime(uploaded_image) -> tuple[str, str]:
@@ -22,7 +19,10 @@ def read_datetime(uploaded_image) -> tuple[str, str]:
 
 def time_from_filename(filename: str):
     """Extracts date from file name."""
-    match = re.search(r"\d{8}_\d{6}", filename)
+    DATE = r"\d{8}"  # 8 digits
+    TIME = r"\d{6}"  # 6 digits
+
+    match = re.search(rf"{DATE}_{TIME}", filename)
     if match:
         date_str = match.group()
         timestamp = pd.to_datetime(date_str, format="%Y%m%d_%H%M%S")
