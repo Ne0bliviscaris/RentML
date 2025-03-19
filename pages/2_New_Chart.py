@@ -2,25 +2,14 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from modules.data_processing import open_json_as_df
 from modules.settings import JSON_FILE
 
 st.set_page_config(layout="wide")
 
 
-def open_json(file):
-    try:
-        json_data = pd.read_json(file)
-    except:
-        json_data = pd.DataFrame()
-    return json_data
-
-
-def show_chart():
+def show_chart(json):
     """Display chart with car mileage data."""
-    json = open_json(JSON_FILE)
-    if json.empty:
-        st.warning("No data to display")
-        return
     json["Date"] = pd.to_datetime(json["Date"]).dt.strftime("%Y-%m-%d")
     json["Time"] = pd.to_datetime(json["Time"]).dt.strftime("%H:%M:%S")
     json = json.sort_values("Date")
@@ -47,7 +36,11 @@ def show_chart():
 
 def main():
     st.title("New Chart")
-    show_chart()
+    json = open_json_as_df(JSON_FILE)
+    if json.empty:
+        st.warning("No data to display")
+        return
+    show_chart(json)
 
 
 main()

@@ -1,9 +1,19 @@
 import json
 
+import pandas as pd
+
 import modules.detection_model as detection_model
 import modules.ocr as ocr
 from modules.date import read_datetime
 from modules.settings import JSON_FILE
+
+
+def open_json_as_df(file):
+    try:
+        json = pd.read_json(file)
+    except:
+        json = pd.DataFrame()
+    return json
 
 
 def extract_data(image) -> list[int, str]:
