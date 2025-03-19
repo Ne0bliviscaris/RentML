@@ -7,9 +7,12 @@ from modules.settings import JSON_FILE
 
 
 def extract_data(image) -> list[int, str]:
+    """Extract data from image."""
+    filename = image.name
+
     mileage = read_mileage(image)
     car_type = detection_model.identify_car(image)
-    date, time = read_datetime(image)
+    date, time = read_datetime(filename)
     return [mileage, car_type, date, time]
 
 
@@ -45,7 +48,7 @@ def is_duplicate(data, new_record):
         if (
             record["Date"] == new_record["Date"]
             and record["Mileage"] == new_record["Mileage"]
-            and record["Car type"] == new_record["Car type"]
+            and record["Car"] == new_record["Car"]
         ):
             return duplicate_index
     return False
@@ -58,7 +61,8 @@ def append_to_json(file_path=None, date=None, time=None, mileage=None, car=None,
         "Date": str(date),
         "Time": str(time),
         "Mileage": mileage,
-        "Car": car,
+        "Type": car.car_type,
+        "Car": car.name,
         "Notes": note or "",
     }
 
@@ -67,15 +71,20 @@ def append_to_json(file_path=None, date=None, time=None, mileage=None, car=None,
         data = [record]
 
     duplicate = is_duplicate(data, record)
-    if duplicate is not False:
-        existing_note = data[duplicate]["Notes"]
-        new_note = record["Notes"]
-
-        if existing_note and new_note:
-            data[duplicate]["Notes"] = f"{existing_note}\n{new_note}"
-        elif new_note:
-            data[duplicate]["Notes"] = new_note
+    if duplicate:
+        merge_notes(data, duplicate, record)
     else:
         data.append(record)
 
     return save_json(data)
+
+
+def merge_notes(data, duplicate, record):
+    """Merge notes from duplicate records."""
+    existing_note = data[duplicate]["Notes"]
+    new_note = record["Notes"]
+
+    if existing_note and new_note:
+        data[duplicate]["Notes"] = f"{existing_note}\n{new_note}"
+    elif new_note:
+        data[duplicate]["Notes"] = new_note

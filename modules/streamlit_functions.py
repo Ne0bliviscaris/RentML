@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 
+import pandas as pd
 import streamlit as st
 
 from modules.cars import Car
@@ -31,9 +31,7 @@ def confirmation_form(data=None):
         with col1:
             submitted = st.form_submit_button("Zapisz")
             if submitted:
-                success = append_to_json(
-                    file_path=None, mileage=mileage, car_type=car, date=date, time=time, note=notes
-                )
+                success = append_to_json(file_path=None, mileage=mileage, car=car, date=date, time=time, note=notes)
                 if success:
                     st.success("Zapisano dane")
                     st.session_state.form_submitted = True
@@ -58,18 +56,18 @@ def mileage_field(mileage):
 
 def date_field(date_str):
     try:
-        date = datetime.strptime(date_str, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
-        date = datetime.now().date()
+        date = pd.to_datetime(date_str).date()
+    except:
+        date = pd.Timestamp.now().date()
     return st.date_input("Data", value=date)
 
 
 def time_field(time_str):
     """Display editable time input field."""
     try:
-        time = datetime.strptime(time_str, "%H:%M:%S").time()
+        time = pd.to_datetime(time_str).time()
     except:
-        time = datetime.now().time()
+        time = pd.Timestamp.now().time()
     return st.time_input("Godzina", value=time)
 
 
