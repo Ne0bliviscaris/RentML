@@ -23,6 +23,7 @@ def load_training_data():
             data = json.load(f)
         df = pd.DataFrame(data)
         df["Date"] = pd.to_datetime(df["Date"])
+        df["Time"] = pd.to_datetime(df["Time"], format="%H:%M:%S").dt.time
         df = df.sort_values("Date")
         return df
     except (FileNotFoundError, json.JSONDecodeError):
@@ -113,8 +114,8 @@ def save_processed_data(df):
     for _, row in df.iterrows():
         record = {
             "Filename": row.get("Filename", ""),
-            "Date": str(row["Date"].date()),
-            "Time": str(row.get("Time", "")),
+            "Date": row["Date"].strftime("%Y-%m-%d"),
+            "Time": row["Time"].strftime("%H:%M:%S"),
             "Mileage": int(row["Mileage"]),
             "Type": row["Car type"],
             "Car": row["Car"],
