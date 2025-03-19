@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
+from modules.data_processing import open_json_as_df
 from modules.settings import JSON_FILE, TRAINING_JSON
 
 st.set_page_config(layout="wide")
@@ -19,11 +20,9 @@ st.title("Rebuilding Database from Training Set")
 def load_training_data():
     """Load data from training dataset JSON file."""
     try:
-        with open(TRAINING_JSON, "r") as f:
-            data = json.load(f)
-        df = pd.DataFrame(data)
+        df = open_json_as_df(TRAINING_JSON)
         df["Date"] = pd.to_datetime(df["Date"])
-        df["Time"] = pd.to_datetime(df["Time"], format="%H:%M:%S").dt.time
+        df["Time"] = pd.to_datetime(df["Time"])
         df = df.sort_values("Date")
         return df
     except (FileNotFoundError, json.JSONDecodeError):
@@ -31,17 +30,24 @@ def load_training_data():
         return pd.DataFrame()
 
 
-def calculate_trend(df, car_type="Dostawczy", degree=3):
-    """Calculate polynomial trend line for specified car type."""
-    filtered_df = df[df["Car type"] == car_type]
-    x = filtered_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-    y = filtered_df["Mileage"].values
+def get_trucks_df(df):
+    """Filter dataframe for truck vehicles only."""
+    trucks_df = df[df["Car type"] == "Dostawczy"]
+    if trucks_df.empty:
+        print("No truck vehicles found in the dataset.")
+    return trucks_df
 
-    model = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+
+def calculate_trend(trucks_df):
+    """Calculate polynomial trend line for specified car type."""
+    x = trucks_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = trucks_df["Mileage"].values
+
+    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
     model.fit(x, y)
     trend = model.predict(x)
 
-    return filtered_df, trend, model
+    return trend
 
 
 def cluster_by_distance_from_trend(df, trend):
@@ -110,23 +116,11 @@ def visualize(df, legend_column="Car type", trend_column=None):
 
 def save_processed_data(df):
     """Save processed data to JSON file."""
-    result = []
-    for _, row in df.iterrows():
-        record = {
-            "Filename": row.get("Filename", ""),
-            "Date": row["Date"].strftime("%Y-%m-%d"),
-            "Time": row["Time"].strftime("%H:%M:%S"),
-            "Mileage": int(row["Mileage"]),
-            "Type": row["Car type"],
-            "Car": row["Car"],
-            "Notes": row.get("Notes", ""),
-        }
-        result.append(record)
-
     try:
+        df["Date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
+        df["Time"] = pd.to_datetime(df["Time"]).dt.strftime("%H:%M:%S")
         os.makedirs(os.path.dirname(JSON_FILE), exist_ok=True)
-        with open(JSON_FILE, "w") as f:
-            json.dump(result, f, indent=2)
+        df.to_json(JSON_FILE, orient="records", indent=2)
         return True
     except Exception as e:
         st.error(f"Error saving data: {str(e)}")
@@ -154,18 +148,18 @@ def step_2_calculate_trend(df):
     """Calculate trend line for truck vehicles only."""
     st.header("2. Calculate trend line (truck vehicles only)")
 
-    truck_df, trend, model = calculate_trend(df, "Dostawczy")
+    truck_df = get_trucks_df(df)
+    trend = calculate_trend(truck_df)
 
     if truck_df.empty:
         st.warning("No truck vehicles found to calculate trend.")
         return None, None, None
 
-    df_with_trend = truck_df.copy()
-    df_with_trend["trend"] = trend
-    chart = visualize(df_with_trend, legend_column="Car type", trend_column="trend")
+    truck_df["trend"] = trend
+    chart = visualize(truck_df, legend_column="Car type", trend_column="trend")
 
     st.altair_chart(chart, use_container_width=True)
-    return truck_df, trend
+    return trend
 
 
 def step_3_cluster_data(truck_df, trend):
@@ -207,42 +201,19 @@ def step_4_identify_vehicle_types(df, df_clustered):
 def step_5_save_data(df_classified):
     """Save processed data to file."""
     st.header("5. Save processed data")
-    col1, col2 = st.columns(2)
 
-    with col1:
-        if st.button("Save data to JSON file"):
-            if save_processed_data(df_classified):
-                st.success(f"Data saved to {JSON_FILE}")
-                st.balloons()
-
-    with col2:
-        st.download_button(
-            label="Download as JSON",
-            data=json.dumps(
-                [
-                    {
-                        "Filename": row.get("Filename", ""),
-                        "Date": str(row["Date"].date()),
-                        "Time": str(row.get("Time", "")),
-                        "Mileage": int(row["Mileage"]),
-                        "Type": row["Car type"],
-                        "Car": row["Car"],
-                        "Notes": row.get("Notes", ""),
-                    }
-                    for _, row in df_classified.iterrows()
-                ],
-                indent=2,
-            ),
-            file_name="classified_vehicles.json",
-            mime="application/json",
-        )
+    if st.button("Save data to JSON file"):
+        if save_processed_data(df_classified):
+            st.success(f"Data saved to {JSON_FILE}")
+            st.balloons()
 
 
 def main():
     """Process training data step by step with visualizations."""
     df = step_1_load_data()
     if not df.empty:
-        truck_df, trend = step_2_calculate_trend(df)
+        truck_df = get_trucks_df(df)
+        trend = step_2_calculate_trend(truck_df)
         if truck_df is not None:
             df_clustered = step_3_cluster_data(truck_df, trend)
             df_classified = step_4_identify_vehicle_types(df, df_clustered)
