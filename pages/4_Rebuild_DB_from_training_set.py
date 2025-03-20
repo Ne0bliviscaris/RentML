@@ -38,18 +38,6 @@ def get_trucks_df(df):
     return trucks_df
 
 
-def calculate_trend(trucks_df):
-    """Calculate polynomial trend line for specified car type."""
-    x = trucks_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-    y = trucks_df["Mileage"].values
-
-    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
-    model.fit(x, y)
-    trend = model.predict(x)
-
-    return trend
-
-
 def cluster_by_distance_from_trend(df, trend):
     """Divide dataframe into clusters based on distance from trend."""
     mileage = df["Mileage"].values
@@ -74,17 +62,26 @@ def identify_car(df, clustered_df):
     return df
 
 
-def altair_chart(df, legend_column="Car type", trend=None):
-    """Create interactive visualization with flexible configuration."""
-
+def calculate_chart_scale(df, trend_column=None):
+    """Calculate appropriate y-axis scale for chart based on data and optional trend."""
     mileage = "Mileage"
     y_min = df[mileage].min() * 0.95
     y_max = df[mileage].max() * 1.05
-    y_scale = alt.Scale(domain=[y_min, y_max])
 
+    if trend_column and trend_column in df.columns:
+        trend_min = df[trend_column].min() * 0.95
+        trend_max = df[trend_column].max() * 1.05
+        y_min = min(y_min, trend_min)
+        y_max = max(y_max, trend_max)
+
+    return alt.Scale(domain=[y_min, y_max])
+
+
+def config_tooltip(df, legend_column):
+    """Create tooltip configuration for chart visualization."""
     date = alt.Tooltip("Date:T")
     time = alt.Tooltip("Time:O")
-    formatted_mileage = alt.Tooltip(mileage, format=" ,")
+    formatted_mileage = alt.Tooltip("Mileage", format=" ,")
     car_type = alt.Tooltip(f"{legend_column}:N")
     tooltip_fields = [date, time, formatted_mileage, car_type]
 
@@ -92,9 +89,14 @@ def altair_chart(df, legend_column="Car type", trend=None):
         notes = alt.Tooltip("Notes:N")
         tooltip_fields.append(notes)
 
+    return tooltip_fields
+
+
+def create_base_chart(df, legend_column, y_scale, tooltip_fields):
+    """Create base chart with styled data points."""
     base_chart = alt.Chart(df).encode(
         x=alt.X("Date:T", title="Date"),
-        y=alt.Y(f"{mileage}:Q", title=mileage, scale=y_scale),
+        y=alt.Y("Mileage:Q", title="Mileage", scale=y_scale),
         tooltip=tooltip_fields,
     )
 
@@ -107,12 +109,33 @@ def altair_chart(df, legend_column="Car type", trend=None):
     points = base_chart.mark_circle(size=200).encode(color=point_colors, opacity=points_opacity)
     chart = points.properties(width=800, height=400).add_params(legend)
 
+    return chart
+
+
+def altair_chart(df, legend_column="Car type", trend=None):
+    """Create interactive visualization with flexible configuration."""
+    y_scale = calculate_chart_scale(df, trend)
+    tooltip_fields = config_tooltip(df, legend_column)
+    chart = create_base_chart(df, legend_column, y_scale, tooltip_fields)
+
     if trend:
         trend_values = alt.Y(f"{trend}:Q")
-        trend_line = base_chart.mark_line(color="red").encode(y=trend_values)
+        trend_line = chart.mark_line(color="red").encode(y=trend_values)
         chart = chart + trend_line
 
     return chart
+
+
+def calculate_trend(trucks_df):
+    """Calculate polynomial trend line for specified car type."""
+    x = trucks_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = trucks_df["Mileage"].values
+
+    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
+    model.fit(x, y)
+    trend = model.predict(x)
+
+    return trend
 
 
 def save_processed_data(df):
