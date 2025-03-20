@@ -71,7 +71,7 @@ def append_to_json(file_path=None, date=None, time=None, mileage=None, car=None,
         "Date": str(date),
         "Time": str(time),
         "Mileage": mileage,
-        "Type": car.car_type,
+        "Car type": car.car_type,
         "Car": car.name,
         "Notes": note or "",
     }
