@@ -65,9 +65,10 @@ def date_field(date_str):
 def time_field(time_str):
     """Display editable time input field."""
     try:
-        time = pd.to_datetime(time_str).time()
+        time = pd.to_datetime(time_str, format="%H:%M:%S").time()
     except:
-        time = pd.Timestamp.now().time()
+        now = pd.Timestamp.now()
+        time = pd.to_datetime(f"{now.hour}:{now.minute}:{now.second}", format="%H:%M:%S").time()
     return st.time_input("Godzina", value=time)
 
 
