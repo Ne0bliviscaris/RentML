@@ -22,7 +22,7 @@ def load_training_data():
     try:
         df = open_json_as_df(TRAINING_JSON)
         df["Date"] = pd.to_datetime(df["Date"])
-        df["Time"] = pd.to_datetime(df["Time"])
+        df["Time"] = pd.to_datetime(df["Time"], format="%H:%M:%S").dt.strftime("%H:%M")
         df = df.sort_values("Date")
         return df
     except (FileNotFoundError, json.JSONDecodeError):
@@ -83,9 +83,10 @@ def altair_chart(df, legend_column="Car type", trend=None):
     y_scale = alt.Scale(domain=[y_min, y_max])
 
     date = alt.Tooltip("Date:T")
+    time = alt.Tooltip("Time:O")
     formatted_mileage = alt.Tooltip(mileage, format=" ,")
     car_type = alt.Tooltip(f"{legend_column}:N")
-    tooltip_fields = [date, formatted_mileage, car_type]
+    tooltip_fields = [date, time, formatted_mileage, car_type]
 
     if "Notes" in df.columns:
         notes = alt.Tooltip("Notes:N")
@@ -118,7 +119,7 @@ def save_processed_data(df):
     """Save processed data to JSON file."""
     try:
         df["Date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
-        df["Time"] = pd.to_datetime(df["Time"]).dt.strftime("%H:%M:%S")
+        df["Time"] = pd.to_datetime(df["Time"]).dt.strftime("%H:%M")
         os.makedirs(os.path.dirname(JSON_FILE), exist_ok=True)
         df.to_json(JSON_FILE, orient="records", indent=2)
         return True
@@ -149,11 +150,11 @@ def step_2_calculate_trend(df):
     st.header("2. Calculate trend line (truck vehicles only)")
 
     truck_df = get_trucks_df(df)
-    trend = calculate_trend(truck_df)
-
     if truck_df.empty:
         st.warning("No truck vehicles found to calculate trend.")
         return None, None, None
+
+    trend = calculate_trend(truck_df)
 
     truck_df["trend"] = trend
     chart = altair_chart(truck_df, legend_column="Car type", trend="trend")
