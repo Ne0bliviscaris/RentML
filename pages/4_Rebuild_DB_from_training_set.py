@@ -74,7 +74,7 @@ def identify_car(df, clustered_df):
     return df
 
 
-def visualize(df, legend_column="Car type", trend_column=None):
+def altair_chart(df, legend_column="Car type", trend=None):
     """Create interactive visualization with flexible configuration."""
 
     mileage = "Mileage"
@@ -106,8 +106,8 @@ def visualize(df, legend_column="Car type", trend_column=None):
     points = base_chart.mark_circle(size=200).encode(color=point_colors, opacity=points_opacity)
     chart = points.properties(width=800, height=400).add_params(legend)
 
-    if trend_column:
-        trend_values = alt.Y(f"{trend_column}:Q")
+    if trend:
+        trend_values = alt.Y(f"{trend}:Q")
         trend_line = base_chart.mark_line(color="red").encode(y=trend_values)
         chart = chart + trend_line
 
@@ -138,7 +138,7 @@ def step_1_load_data():
     st.write(f"Loaded {len(df)} records.")
     st.dataframe(df.head())
 
-    chart = visualize(df)
+    chart = altair_chart(df)
     st.altair_chart(chart, use_container_width=True)
 
     return df
@@ -156,7 +156,7 @@ def step_2_calculate_trend(df):
         return None, None, None
 
     truck_df["trend"] = trend
-    chart = visualize(truck_df, legend_column="Car type", trend_column="trend")
+    chart = altair_chart(truck_df, legend_column="Car type", trend="trend")
 
     st.altair_chart(chart, use_container_width=True)
     return trend
@@ -171,7 +171,7 @@ def step_3_cluster_data(truck_df, trend):
         return truck_df
 
     df_clustered = cluster_by_distance_from_trend(truck_df.copy(), trend)
-    chart = visualize(df_clustered, legend_column="group")
+    chart = altair_chart(df_clustered, legend_column="group")
 
     st.altair_chart(chart, use_container_width=True)
     return df_clustered
@@ -192,7 +192,7 @@ def step_4_identify_vehicle_types(df, df_clustered):
     st.write(f"Dostawczy L3H2: {len(l3h2)} records")
     st.write(f"Dostawczy L4H2: {len(l4h2)} records")
 
-    chart = visualize(df_classified, legend_column="Car")
+    chart = altair_chart(df_classified, legend_column="Car")
     st.altair_chart(chart, use_container_width=True)
 
     return df_classified
