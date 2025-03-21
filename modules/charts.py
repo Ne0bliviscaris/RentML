@@ -1,5 +1,8 @@
 import altair as alt
 import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 
 from modules.data_processing import open_json_as_df
 
@@ -96,3 +99,21 @@ def filter_by_car(df, car_type=None, car_name=None):
     if car_type and car_name:
         return df[(df["Car type"] == car_type) & (df["Car"] == car_name)]
     return df
+
+
+def calculate_trend(df, color="red"):
+    """Calculate polynomial trend and return trend line chart."""
+    if df.empty:
+        return df, None
+
+    x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = df["Mileage"].values
+
+    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
+    model.fit(x, y)
+    trend_values = model.predict(x)
+
+    df["trend"] = trend_values
+    trend_line = alt.Chart(df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
+
+    return df, trend_line

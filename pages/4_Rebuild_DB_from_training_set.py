@@ -1,14 +1,9 @@
-import json
 import os
 
-import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
 from sklearn.cluster import KMeans
-from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
 
 import modules.charts as charts
 from modules.settings import JSON_FILE, TRAINING_JSON
@@ -38,21 +33,6 @@ def identify_car(df, clustered_df):
     df.loc[l3h2, "Car"] = "L3H2"
 
     return df
-
-
-def calculate_trend(df, color="red"):
-    """Calculate polynomial trend and return trend line chart."""
-    x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-    y = df["Mileage"].values
-
-    model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
-    model.fit(x, y)
-    trend_values = model.predict(x)
-
-    df["trend"] = trend_values
-    trend_line = alt.Chart(df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
-
-    return df, trend_line
 
 
 def save_data_to_json(df, target_file=JSON_FILE):
@@ -94,7 +74,7 @@ def step_2_calculate_trend(df):
         st.warning("No vehicles found to calculate trend.")
         return pd.DataFrame()
 
-    truck_df_with_trend, trend_line = calculate_trend(truck_df)
+    truck_df_with_trend, trend_line = charts.calculate_trend(truck_df)
 
     chart = charts.show_chart(truck_df, legend_column="Car type", trend_lines=trend_line)
     st.altair_chart(chart, use_container_width=True)
