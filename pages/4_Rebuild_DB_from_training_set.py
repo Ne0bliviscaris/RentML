@@ -25,10 +25,9 @@ def get_trucks_df(df):
     return trucks_df
 
 
-def cluster_by_distance_from_trend(df, trend):
+def cluster_by_distance_from_trend(df):
     """Divide dataframe into clusters based on distance from trend."""
-    mileage = df["Mileage"].values
-    distance_from_trend = np.abs(mileage - trend).reshape(-1, 1)
+    distance_from_trend = np.abs(df["Mileage"] - df["trend"]).values.reshape(-1, 1)
     kmeans = KMeans(n_clusters=2, random_state=0)
     cluster_labels = kmeans.fit_predict(distance_from_trend)
     df["group"] = cluster_labels
@@ -49,8 +48,8 @@ def identify_car(df, clustered_df):
     return df
 
 
-def calculate_trend_values(trucks_df):
-    """Calculate polynomial trend values."""
+def calculate_trend(trucks_df, color="red"):
+    """Calculate polynomial trend and return trend line chart."""
     x = trucks_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
     y = trucks_df["Mileage"].values
 
@@ -58,14 +57,10 @@ def calculate_trend_values(trucks_df):
     model.fit(x, y)
     trend_values = model.predict(x)
 
-    return trend_values
+    trucks_df["trend"] = trend_values
+    trend_line = alt.Chart(trucks_df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
 
-
-def create_trend_line(trucks_df, trend_values, color="red"):
-    """Create trend line chart from trend values."""
-    trend_df = pd.DataFrame({"Date": trucks_df["Date"], "trend": trend_values})
-    trend_line = alt.Chart(trend_df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
-    return trend_line
+    return trucks_df, trend_line
 
 
 def save_data_to_json(df, target_file=JSON_FILE):
@@ -107,16 +102,15 @@ def step_2_calculate_trend(df):
         st.warning("No truck vehicles found to calculate trend.")
         return None
 
-    trend_values = calculate_trend_values(truck_df)
-    trend_line = create_trend_line(truck_df, trend_values)
+    truck_df_with_trend, trend_line = calculate_trend(truck_df)
 
     chart = charts.show_chart(truck_df, legend_column="Car type", trend_lines=trend_line)
     st.altair_chart(chart, use_container_width=True)
 
-    return trend_values
+    return truck_df_with_trend
 
 
-def step_3_cluster_data(truck_df, trend):
+def step_3_cluster_data(truck_df):
     """Cluster truck vehicles by distance from trend line."""
     st.header("3. Cluster truck vehicles by distance from trend")
 
@@ -124,7 +118,7 @@ def step_3_cluster_data(truck_df, trend):
         st.warning("No truck vehicles found for clustering.")
         return truck_df
 
-    df_clustered = cluster_by_distance_from_trend(truck_df.copy(), trend)
+    df_clustered = cluster_by_distance_from_trend(truck_df)
     chart = charts.show_chart(df_clustered, legend_column="group")
 
     st.altair_chart(chart, use_container_width=True)
@@ -167,9 +161,9 @@ def main():
     df = step_1_load_data()
     if not df.empty:
         truck_df = get_trucks_df(df)
-        trend_values = step_2_calculate_trend(truck_df)
+        truck_df_with_trend = step_2_calculate_trend(truck_df)
         if truck_df is not None:
-            df_clustered = step_3_cluster_data(truck_df, trend_values)
+            df_clustered = step_3_cluster_data(truck_df_with_trend)
             df_classified = step_4_identify_vehicle_types(df, df_clustered)
             step_5_save_data(df_classified)
 
