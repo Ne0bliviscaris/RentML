@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
 from modules.data_processing import open_json_as_df
+from modules.settings import JSON_FILE
 
 
 def show_chart(df, legend_column="Car type", trend_lines=None):
@@ -19,7 +20,7 @@ def show_chart(df, legend_column="Car type", trend_lines=None):
     return chart
 
 
-def read_and_format_json(json):
+def read_and_format_json(json=JSON_FILE):
     """Load data from training dataset JSON file."""
     try:
         df = open_json_as_df(json)
