@@ -17,9 +17,15 @@ st.set_page_config(layout="wide")
 st.title("Rebuilding Database from Training Set")
 
 
-def get_trucks_df(df):
-    """Filter dataframe for truck vehicles only."""
-    return df[df["Car type"] == "Dostawczy"]
+def filter_by_car(df, car_type=None, car_name=None):
+    """Filter dataframe by car type or name."""
+    if car_type:
+        return df[df["Car type"] == car_type]
+    if car_name:
+        return df[df["Car"] == car_name]
+    if car_type and car_name:
+        return df[(df["Car type"] == car_type) & (df["Car"] == car_name)]
+    return df
 
 
 def cluster_by_distance_from_trend(df):
@@ -45,19 +51,19 @@ def identify_car(df, clustered_df):
     return df
 
 
-def calculate_trend(trucks_df, color="red"):
+def calculate_trend(df, color="red"):
     """Calculate polynomial trend and return trend line chart."""
-    x = trucks_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-    y = trucks_df["Mileage"].values
+    x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = df["Mileage"].values
 
     model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
     model.fit(x, y)
     trend_values = model.predict(x)
 
-    trucks_df["trend"] = trend_values
-    trend_line = alt.Chart(trucks_df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
+    df["trend"] = trend_values
+    trend_line = alt.Chart(df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
 
-    return trucks_df, trend_line
+    return df, trend_line
 
 
 def save_data_to_json(df, target_file=JSON_FILE):
@@ -94,9 +100,9 @@ def step_2_calculate_trend(df):
     """Calculate trend line for truck vehicles only."""
     st.header("2. Calculate trend line (truck vehicles only)")
 
-    truck_df = get_trucks_df(df)
+    truck_df = filter_by_car(df, car_type="Dostawczy")
     if truck_df.empty:
-        st.warning("No truck vehicles found to calculate trend.")
+        st.warning("No vehicles found to calculate trend.")
         return pd.DataFrame()
 
     truck_df_with_trend, trend_line = calculate_trend(truck_df)
