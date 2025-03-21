@@ -68,13 +68,13 @@ def create_trend_line(trucks_df, trend_values, color="red"):
     return trend_line
 
 
-def save_processed_data(df):
+def save_data_to_json(df, target_file=JSON_FILE):
     """Save processed data to JSON file."""
     try:
         df["Date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
         df["Time"] = pd.to_datetime(df["Time"]).dt.strftime("%H:%M")
-        os.makedirs(os.path.dirname(JSON_FILE), exist_ok=True)
-        df.to_json(JSON_FILE, orient="records", indent=2)
+        os.makedirs(os.path.dirname(target_file), exist_ok=True)
+        df.to_json(target_file, orient="records", indent=2)
         return True
     except Exception as e:
         st.error(f"Error saving data: {str(e)}")
@@ -157,7 +157,7 @@ def step_5_save_data(df_classified):
     st.header("5. Save processed data")
 
     if st.button("Save data to JSON file"):
-        if save_processed_data(df_classified):
+        if save_data_to_json(df_classified):
             st.success(f"Data saved to {JSON_FILE}")
             st.balloons()
 
