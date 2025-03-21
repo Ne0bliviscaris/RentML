@@ -93,7 +93,7 @@ def create_base_chart(df, legend_column, y_scale, tooltip_fields):
     return chart
 
 
-def altair_chart(df, legend_column="Car type", trend_line=None):
+def show_chart(df, legend_column="Car type", trend_line=None):
     """Create interactive visualization with flexible configuration."""
     y_scale = calculate_chart_scale(df)
     tooltip_fields = config_tooltip(df)
@@ -148,7 +148,7 @@ def step_1_load_data():
     st.write(f"Loaded {len(df)} records.")
     st.dataframe(df.head())
 
-    chart = altair_chart(df)
+    chart = show_chart(df)
     st.altair_chart(chart, use_container_width=True)
 
     return df
@@ -166,7 +166,7 @@ def step_2_calculate_trend(df):
     trend_values = calculate_trend_values(truck_df)
     trend_line = create_trend_line(truck_df, trend_values)
 
-    chart = altair_chart(truck_df, legend_column="Car type", trend_line=trend_line)
+    chart = show_chart(truck_df, legend_column="Car type", trend_line=trend_line)
     st.altair_chart(chart, use_container_width=True)
 
     return trend_values
@@ -181,7 +181,7 @@ def step_3_cluster_data(truck_df, trend):
         return truck_df
 
     df_clustered = cluster_by_distance_from_trend(truck_df.copy(), trend)
-    chart = altair_chart(df_clustered, legend_column="group")
+    chart = show_chart(df_clustered, legend_column="group")
 
     st.altair_chart(chart, use_container_width=True)
     return df_clustered
@@ -202,7 +202,7 @@ def step_4_identify_vehicle_types(df, df_clustered):
     st.write(f"Dostawczy L3H2: {len(l3h2)} records")
     st.write(f"Dostawczy L4H2: {len(l4h2)} records")
 
-    chart = altair_chart(df_classified, legend_column="Car")
+    chart = show_chart(df_classified, legend_column="Car")
     st.altair_chart(chart, use_container_width=True)
 
     return df_classified
