@@ -19,10 +19,7 @@ st.title("Rebuilding Database from Training Set")
 
 def get_trucks_df(df):
     """Filter dataframe for truck vehicles only."""
-    trucks_df = df[df["Car type"] == "Dostawczy"]
-    if trucks_df.empty:
-        print("No truck vehicles found in the dataset.")
-    return trucks_df
+    return df[df["Car type"] == "Dostawczy"]
 
 
 def cluster_by_distance_from_trend(df):
@@ -100,7 +97,7 @@ def step_2_calculate_trend(df):
     truck_df = get_trucks_df(df)
     if truck_df.empty:
         st.warning("No truck vehicles found to calculate trend.")
-        return None
+        return pd.DataFrame()
 
     truck_df_with_trend, trend_line = calculate_trend(truck_df)
 
@@ -160,9 +157,8 @@ def main():
     """Process training data step by step with visualizations."""
     df = step_1_load_data()
     if not df.empty:
-        truck_df = get_trucks_df(df)
-        truck_df_with_trend = step_2_calculate_trend(truck_df)
-        if truck_df is not None:
+        truck_df_with_trend = step_2_calculate_trend(df)
+        if not truck_df_with_trend.empty:
             df_clustered = step_3_cluster_data(truck_df_with_trend)
             df_classified = step_4_identify_vehicle_types(df, df_clustered)
             step_5_save_data(df_classified)
