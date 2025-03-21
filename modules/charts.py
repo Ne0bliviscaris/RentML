@@ -4,6 +4,18 @@ import pandas as pd
 from modules.data_processing import open_json_as_df
 
 
+def show_chart(df, legend_column="Car type", trend_lines=None):
+    """Create interactive visualization with flexible configuration."""
+    tooltip_fields = config_tooltip(df)
+    y_scale = calculate_chart_scale(df)
+    chart = create_base_chart(df, legend_column, tooltip_fields, y_scale)
+
+    if trend_lines:
+        chart = add_lines_to_chart(chart, trend_lines)
+
+    return chart
+
+
 def read_and_format_json(json):
     """Load data from training dataset JSON file."""
     try:
@@ -63,3 +75,13 @@ def calculate_chart_scale(df, mileage="Mileage"):
     y_min = df[mileage].min() * 0.95
     y_max = df[mileage].max() * 1.05
     return alt.Scale(domain=[y_min, y_max])
+
+
+def add_lines_to_chart(chart, lines):
+    """Add trend lines to the chart."""
+    if not isinstance(lines, list):
+        lines = [lines]
+
+    for line in lines:
+        chart = chart + line
+    return chart
