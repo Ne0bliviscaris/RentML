@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
-from modules.altair import read_and_format_json
+import modules.charts as charts
 from modules.settings import JSON_FILE, TRAINING_JSON
 
 st.set_page_config(layout="wide")
@@ -73,31 +73,11 @@ def config_tooltip(df):
     return tooltip_fields
 
 
-def create_base_chart(df, legend_column, y_scale, tooltip_fields):
-    """Create base chart with styled data points."""
-    base_chart = alt.Chart(df).encode(
-        x=alt.X("Date:T", title="Date"),
-        y=alt.Y("Mileage:Q", title="Mileage", scale=y_scale),
-        tooltip=tooltip_fields,
-    )
-
-    point_colors = alt.Color(f"{legend_column}:N")
-    legend = alt.selection_point(fields=[legend_column], bind="legend")
-    visible = alt.value(1)
-    hidden = alt.value(0.2)
-    points_opacity = alt.condition(predicate=legend, if_true=visible, if_false=hidden)
-
-    points = base_chart.mark_circle(size=200).encode(color=point_colors, opacity=points_opacity)
-    chart = points.properties(width=800, height=400).add_params(legend)
-
-    return chart
-
-
 def show_chart(df, legend_column="Car type", trend_line=None):
     """Create interactive visualization with flexible configuration."""
-    y_scale = calculate_chart_scale(df)
     tooltip_fields = config_tooltip(df)
-    chart = create_base_chart(df, legend_column, y_scale, tooltip_fields)
+    y_scale = calculate_chart_scale(df)
+    chart = charts.create_base_chart(df, legend_column, tooltip_fields, y_scale)
 
     if trend_line:
         chart = chart + trend_line
@@ -140,7 +120,7 @@ def save_processed_data(df):
 def step_1_load_data():
     """Load and visualize data with car type colors."""
     st.header("1. Load training data")
-    df = read_and_format_json(TRAINING_JSON)
+    df = charts.read_and_format_json(TRAINING_JSON)
     if df.empty:
         st.warning("No training data to load.")
         return pd.DataFrame()
