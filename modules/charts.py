@@ -85,3 +85,14 @@ def add_lines_to_chart(chart, lines):
     for line in lines:
         chart = chart + line
     return chart
+
+
+def filter_by_car(df, car_type=None, car_name=None):
+    """Filter dataframe by car type or name."""
+    if car_type:
+        return df[df["Car type"] == car_type]
+    if car_name:
+        return df[df["Car"] == car_name]
+    if car_type and car_name:
+        return df[(df["Car type"] == car_type) & (df["Car"] == car_name)]
+    return df

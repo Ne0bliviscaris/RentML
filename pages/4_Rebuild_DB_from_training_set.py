@@ -17,17 +17,6 @@ st.set_page_config(layout="wide")
 st.title("Rebuilding Database from Training Set")
 
 
-def filter_by_car(df, car_type=None, car_name=None):
-    """Filter dataframe by car type or name."""
-    if car_type:
-        return df[df["Car type"] == car_type]
-    if car_name:
-        return df[df["Car"] == car_name]
-    if car_type and car_name:
-        return df[(df["Car type"] == car_type) & (df["Car"] == car_name)]
-    return df
-
-
 def cluster_by_distance_from_trend(df):
     """Divide dataframe into clusters based on distance from trend."""
     distance_from_trend = np.abs(df["Mileage"] - df["trend"]).values.reshape(-1, 1)
@@ -100,7 +89,7 @@ def step_2_calculate_trend(df):
     """Calculate trend line for truck vehicles only."""
     st.header("2. Calculate trend line (truck vehicles only)")
 
-    truck_df = filter_by_car(df, car_type="Dostawczy")
+    truck_df = charts.filter_by_car(df, car_type="Dostawczy")
     if truck_df.empty:
         st.warning("No vehicles found to calculate trend.")
         return pd.DataFrame()
