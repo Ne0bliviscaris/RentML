@@ -102,11 +102,20 @@ def filter_by_car(df, car_type=None, car_name=None):
     return df
 
 
-def regression_model() -> Pipeline:
-    """Configure prediction model."""
+def predict_trend(df):
+    """Predict trend for a specific car name."""
+    x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = df["Mileage"].values
+
     polynomial_features = PolynomialFeatures(degree=3)
     linear_regression = LinearRegression()
-    return make_pipeline(polynomial_features, linear_regression)
+    model = make_pipeline(polynomial_features, linear_regression)
+
+    model.fit(x, y)
+    trend_values = model.predict(x)
+
+    df["trend"] = trend_values
+    return df
 
 
 def calculate_trend(df, color="red"):
@@ -114,14 +123,7 @@ def calculate_trend(df, color="red"):
     if df.empty:
         return df, None
 
-    x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-    y = df["Mileage"].values
+    df_with_trend = predict_trend(df)
+    trend_line = alt.Chart(df_with_trend).mark_line(color=color).encode(x="Date:T", y="trend:Q")
 
-    model = regression_model()
-    model.fit(x, y)
-    trend_values = model.predict(x)
-
-    df["trend"] = trend_values
-    trend_line = alt.Chart(df).mark_line(color=color).encode(x="Date:T", y="trend:Q")
-
-    return df, trend_line
+    return df_with_trend, trend_line
