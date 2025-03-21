@@ -10,24 +10,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
-from modules.data_processing import open_json_as_df
+from modules.altair import read_and_format_json
 from modules.settings import JSON_FILE, TRAINING_JSON
 
 st.set_page_config(layout="wide")
 st.title("Rebuilding Database from Training Set")
-
-
-def load_training_data():
-    """Load data from training dataset JSON file."""
-    try:
-        df = open_json_as_df(TRAINING_JSON)
-        df["Date"] = pd.to_datetime(df["Date"])
-        df["Time"] = pd.to_datetime(df["Time"], format="%H:%M:%S").dt.strftime("%H:%M")
-        df = df.sort_values("Date")
-        return df
-    except (FileNotFoundError, json.JSONDecodeError):
-        st.error("Error loading training data. File does not exist or is empty.")
-        return pd.DataFrame()
 
 
 def get_trucks_df(df):
@@ -153,9 +140,9 @@ def save_processed_data(df):
 def step_1_load_data():
     """Load and visualize data with car type colors."""
     st.header("1. Load training data")
-    df = load_training_data()
+    df = read_and_format_json(TRAINING_JSON)
     if df.empty:
-        st.warning("No training data to process.")
+        st.warning("No training data to load.")
         return pd.DataFrame()
 
     st.write(f"Loaded {len(df)} records.")
