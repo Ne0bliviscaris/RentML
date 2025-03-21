@@ -58,24 +58,9 @@ def calculate_chart_scale(df):
     return alt.Scale(domain=[y_min, y_max])
 
 
-def config_tooltip(df):
-    """Create tooltip configuration for chart visualization."""
-    date = alt.Tooltip("Date:T")
-    time = alt.Tooltip("Time:O")
-    formatted_mileage = alt.Tooltip("Mileage", format=" ,")
-    car_type = alt.Tooltip(f"Car type:N")
-    tooltip_fields = [date, time, formatted_mileage, car_type]
-
-    if "Notes" in df.columns:
-        notes = alt.Tooltip("Notes:N")
-        tooltip_fields.append(notes)
-
-    return tooltip_fields
-
-
 def show_chart(df, legend_column="Car type", trend_line=None):
     """Create interactive visualization with flexible configuration."""
-    tooltip_fields = config_tooltip(df)
+    tooltip_fields = charts.config_tooltip(df)
     y_scale = calculate_chart_scale(df)
     chart = charts.create_base_chart(df, legend_column, tooltip_fields, y_scale)
 

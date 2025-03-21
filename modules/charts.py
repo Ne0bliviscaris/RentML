@@ -34,3 +34,25 @@ def create_base_chart(df, legend_column, tooltip_fields, y_scale=None):
     chart = points.properties(width=800, height=400).add_params(legend)
 
     return chart
+
+
+def config_tooltip(df, date=True, time=True, mileage=True, car_type=True, notes=True):
+    """Create tooltip configuration showing available fields from dataframe."""
+    tooltip_fields = []
+
+    if "Date" in df.columns and date:
+        tooltip_fields.append(alt.Tooltip("Date:T"))
+
+    if "Time" in df.columns and time:
+        tooltip_fields.append(alt.Tooltip("Time:O"))
+
+    if "Mileage" in df.columns and mileage:
+        tooltip_fields.append(alt.Tooltip("Mileage", format=" ,"))
+
+    if "Car type" in df.columns and car_type:
+        tooltip_fields.append(alt.Tooltip("Car type:N"))
+
+    if "Notes" in df.columns and notes:
+        tooltip_fields.append(alt.Tooltip("Notes:N"))
+
+    return tooltip_fields
