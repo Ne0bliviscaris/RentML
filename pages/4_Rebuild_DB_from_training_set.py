@@ -49,19 +49,10 @@ def identify_car(df, clustered_df):
     return df
 
 
-def calculate_chart_scale(df):
-    """Calculate appropriate y-axis scale for chart based on data and optional trend."""
-    mileage = "Mileage"
-    y_min = df[mileage].min() * 0.95
-    y_max = df[mileage].max() * 1.05
-
-    return alt.Scale(domain=[y_min, y_max])
-
-
 def show_chart(df, legend_column="Car type", trend_line=None):
     """Create interactive visualization with flexible configuration."""
     tooltip_fields = charts.config_tooltip(df)
-    y_scale = calculate_chart_scale(df)
+    y_scale = charts.calculate_chart_scale(df)
     chart = charts.create_base_chart(df, legend_column, tooltip_fields, y_scale)
 
     if trend_line:

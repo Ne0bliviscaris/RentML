@@ -56,3 +56,10 @@ def config_tooltip(df, date=True, time=True, mileage=True, car_type=True, notes=
         tooltip_fields.append(alt.Tooltip("Notes:N"))
 
     return tooltip_fields
+
+
+def calculate_chart_scale(df, mileage="Mileage"):
+    """Calculate appropriate y-axis scale for chart based on data and optional trend."""
+    y_min = df[mileage].min() * 0.95
+    y_max = df[mileage].max() * 1.05
+    return alt.Scale(domain=[y_min, y_max])
