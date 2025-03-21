@@ -118,7 +118,7 @@ def predict_trend(df):
     return df
 
 
-def calculate_trend(df, color="red"):
+def calculate_trend(df, target_date=None, color="red"):
     """Calculate polynomial trend and return trend line chart."""
     if df.empty:
         return df, None
