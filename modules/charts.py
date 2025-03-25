@@ -122,14 +122,15 @@ def prediction_model(x, y):
 
 def predict_trend(df):
     """Predict trend for a specific car name."""
+    trend_df = df.copy()
     x = df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
     y = df["Mileage"].values
 
     model = prediction_model(x, y)
     trend_values = model.predict(x)
 
-    df["trend"] = trend_values
-    return df
+    trend_df["trend"] = trend_values
+    return trend_df
 
 
 def calculate_trend(df, target_date=None, color="red"):
@@ -150,7 +151,7 @@ def calculate_trend(df, target_date=None, color="red"):
 
 def predict_future_trend(df, target_date):
     """Generate predictions for dates up to target_date"""
-    future_dates = pd.date_range(start=df["Date"].min(), end=target_date, freq="M")
+    future_dates = pd.date_range(start=df["Date"].min(), end=target_date, freq="ME")
     future_df = pd.DataFrame({"Date": future_dates})
 
     future_x = future_df["Date"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
