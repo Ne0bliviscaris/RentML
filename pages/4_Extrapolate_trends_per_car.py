@@ -26,7 +26,7 @@ def calculate_trend_lines(df, extrapolation_date):
     return trend_lines
 
 
-def show_chart(df, extrapolation_date):
+def show_extrapolated_chart(df, extrapolation_date):
     """Create interactive visualization with points and trend lines"""
     trend_lines = calculate_trend_lines(df, extrapolation_date)
     chart = charts.show_chart(df, legend_column="Car", trend_lines=trend_lines)
@@ -45,7 +45,7 @@ def main():
     df = charts.read_and_format_json()
     target_date = set_extrapolation_date()
 
-    show_chart(df, target_date)
+    show_extrapolated_chart(df, target_date)
 
 
 if __name__ == "__main__":
