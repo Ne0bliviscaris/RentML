@@ -1,19 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import altair as alt
-import pandas as pd
 import streamlit as st
-from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
 
 import modules.charts as charts
 
 st.set_page_config(layout="wide")
 
 
-def show_chart(df, extrapolation_date):
-    """Create interactive visualization with points and trend lines"""
+def calculate_trend_lines(df, extrapolation_date):
+    """Calculate trend lines for each car type and model"""
     scudo = charts.filter_by_car(df, car_type="Osobowy")
     l3h2 = charts.filter_by_car(df, car_name="L3H2")
     l4h2 = charts.filter_by_car(df, car_name="L4H2")
@@ -27,7 +22,13 @@ def show_chart(df, extrapolation_date):
         l3h2_trend,
         l4h2_trend,
     ]
-    # Create and display visualization
+
+    return trend_lines
+
+
+def show_chart(df, extrapolation_date):
+    """Create interactive visualization with points and trend lines"""
+    trend_lines = calculate_trend_lines(df, extrapolation_date)
     chart = charts.show_chart(df, legend_column="Car", trend_lines=trend_lines)
     st.altair_chart(chart, use_container_width=True)
 
@@ -43,6 +44,7 @@ def main():
     """Main application flow for trend calculation and visualization"""
     df = charts.read_and_format_json()
     target_date = set_extrapolation_date()
+
     show_chart(df, target_date)
 
 
