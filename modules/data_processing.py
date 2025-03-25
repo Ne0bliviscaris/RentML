@@ -8,7 +8,7 @@ from modules.date import read_datetime
 from modules.settings import JSON_FILE
 
 
-def open_json_as_df(file):
+def open_json_as_df(file=JSON_FILE):
     try:
         json = pd.read_json(file)
     except:
