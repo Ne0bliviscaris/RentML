@@ -10,9 +10,11 @@ import streamlit as st
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
+from modules.settings import OLD_JSON_FILE
+
 
 # Load and transform data in DataFrame
-def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFrame:
+def load_and_transform_data() -> pd.DataFrame:
     """
     Load data from a JSON file and transform it into a DataFrame.
 
@@ -24,24 +26,11 @@ def load_and_transform_data(json_file="data/result/mileage.json") -> pd.DataFram
     Returns:
         DataFrame: The transformed data.
     """
-    if not os.path.exists(json_file):
-        return pd.DataFrame()
+    df = pd.read_json(OLD_JSON_FILE) if os.path.exists(OLD_JSON_FILE) else pd.DataFrame()
 
-    with open(json_file, "r") as f:
-        data = json.load(f)
-
-    df = pd.DataFrame(data)
-
-    # Load data from JSON file
-    df = pd.read_json(json_file)
-
-    # Convert 'Date' column to datetime format
     df["Date"] = pd.to_datetime(df["Date"])
-
     # Remove square brackets and quotation marks from 'Mileage' column
     df["Mileage"] = df["Mileage"].apply(lambda x: x.replace("[", "").replace("]", "").replace("'", ""))
-
-    # Convert 'Mileage' column to numeric format
     df["Mileage"] = df["Mileage"].astype(int)
 
     return df
@@ -52,42 +41,33 @@ def extract_groups(df) -> tuple:
     """
     Divide initial DataFrame 2 groups based on car type - truck or car.
     Truck group is further divided into 2 subgroups based on their mileage.
-
-    The function performs the following steps:
-    - Calculates the linear trend of the 'Mileage' over 'Date'
-    - Calculates the distance of each point from the trend line
-    - Divides distances into 2 groups using K-Means
-    - Extracts groups based on the K-Means result
-    - Extracts subgroups from truck group based on the 'Type' column
-
-    Args:
-        df (DataFrame): The input DataFrame.
-
-    Returns:
-        tuple: A tuple containing the extracted groups (car, l3h2, l4h2) and the modified DataFrame.
     """
-    # Calculate linear trend
+    mileage = df["Mileage"].values
+
+    trend = regression_line(df)
+
+    distance_from_trend = np.abs(mileage - trend)
+
+    # Divide distances into 2 groups using K-Means
+    kmeans = KMeans(n_clusters=2, random_state=0).fit(distance_from_trend.reshape(-1, 1))
+    df["group"] = kmeans.labels_
+
+    group = df[df["group"] == 0]
+
+    l4h2 = df[df["group"] == 1]
+    car = group[group["Type"] == "car"]
+    l3h2 = group[group["Type"] == "truck"]
+
+    return car, l3h2, l4h2, df
+
+
+def regression_line(df):
+    """Draw a linear regression model from the DataFrame."""
     x = df["Date"].map(dt.datetime.toordinal).values.reshape(-1, 1)
     y = df["Mileage"].values
     model = LinearRegression().fit(x, y)
     trend = model.predict(x)
-
-    # Calculate the distance of each point from the trend line
-    distances = np.abs(y - trend)
-
-    # Divide distances into 2 groups using K-Means
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(distances.reshape(-1, 1))
-    df["group"] = kmeans.labels_
-
-    # Extract groups
-    group1 = df[df["group"] == 0]
-    l3h2 = df[df["group"] == 1]
-
-    # Extract subgroups from group 1 based on the 'Type' column
-    car = group1[group1["Type"] == "car"]
-    l4h2 = group1[group1["Type"] == "truck"]
-
-    return car, l3h2, l4h2, df
+    return trend
 
 
 # Assign records to one of 3 classes
