@@ -13,7 +13,7 @@ def main():
     if json.empty:
         st.warning("No data to display")
         return
-    chart = show_chart(json)
+    chart = show_chart(json, legend_column="Car")
     st.altair_chart(chart, use_container_width=True)
 
 
