@@ -140,7 +140,8 @@ def calculate_trend(df, target_date=None, color="red"):
 
     df_with_trend = predict_trend(df)
 
-    if target_date and target_date > df["Date"].max():
+    extrapolation = target_date and target_date > df["Date"].max()
+    if extrapolation:
         future_df = predict_future_trend(df, target_date)
         trend_line = create_trend_line(future_df, color)
     else:
