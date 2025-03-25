@@ -3,6 +3,7 @@ from datetime import datetime
 import streamlit as st
 
 import modules.charts as charts
+from modules.trends import predict_car
 
 st.set_page_config(layout="wide")
 
@@ -40,12 +41,31 @@ def set_extrapolation_date():
     return target_date
 
 
+def show_car_prediction(df):
+    """Show interface for car prediction based on mileage and date"""
+    st.subheader("Predict car based on mileage and date")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        mileage = st.number_input("Mileage", min_value=0, value=50000)
+        prediction_date = st.date_input("Date")
+
+    with col2:
+        car_type = st.selectbox("Car type (optional)", options=["All"] + list(df["Car type"].unique()))
+        car_type = None if car_type == "All" else car_type
+
+    if st.button("Predict car"):
+        predicted_car = predict_car(mileage, prediction_date, df, car_type)
+        st.success(f"Predicted car: {predicted_car}")
+
+
 def main():
     """Main application flow for trend calculation and visualization"""
     df = charts.read_and_format_json()
     target_date = set_extrapolation_date()
 
     show_extrapolated_chart(df, target_date)
+    show_car_prediction(df)
 
 
 if __name__ == "__main__":
