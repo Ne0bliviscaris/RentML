@@ -3,7 +3,6 @@ MODEL_PATH = "data\\recognition-model\\detect_car.pth"
 
 # Data storage paths
 JSON_FILE = "modules\\data\\mileage.json"
-OLD_JSON_FILE = "data\\result\\mileage.json"
 
 # Training dataset paths
 TRAINING_DATASET = "data\\training-dataset"
