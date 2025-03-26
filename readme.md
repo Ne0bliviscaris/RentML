@@ -10,8 +10,9 @@ Managing a car rental business requires meticulous documentation. Each vehicle h
 
 When done manually, this process is time-consuming and error-prone.
 
-App is working on authentic data for a Polish car rental business. Because of that, some elements are named in Polish language.
+> App is working on authentic data for a Polish car rental business. Because of that, some elements are named in Polish language.
 
+> This is a portfolio README focused on business problem solving. Technical README with setup instructions and project structure is available in [modules/README.md](modules/README.md).
 ## Solution
 
 RentML automates car rental management processes:
