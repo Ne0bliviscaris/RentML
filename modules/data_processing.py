@@ -19,17 +19,10 @@ def open_json_as_df(file=JSON_FILE):
 def extract_data(image) -> list[int, str]:
     """Extract data from image."""
     filename = image.name
-
-    mileage = read_mileage(image)
+    mileage = ocr.mileage_ocr(image)
     car_type = detection_model.identify_car(image)
     date, time = read_datetime(filename)
     return [mileage, car_type, date, time]
-
-
-def read_mileage(img):
-    """Perform OCR on image."""
-    mileage = ocr.mileage_ocr(img)
-    return mileage[0] if mileage is not None else None
 
 
 def open_json():
